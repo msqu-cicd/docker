@@ -72,10 +72,6 @@ inputs:
     description: ""
     default: "true"
 
-  debug-step:
-    description: ""
-    default: "false"
-
   push-tags:
     description: ""
     default: "true"
@@ -127,9 +123,12 @@ runs:
         fi
 
         echo "CI_REGISTRY=$CI_REGISTRY" >> $GITHUB_ENV
+        echo "extract CI_REGISTRY=$CI_REGISTRY"
 
         REGISTRY_TARGETS="$CI_REGISTRY/$GITHUB_REPOSITORY"
         echo "REGISTRY_TARGETS=$REGISTRY_TARGETS" >> $GITHUB_ENV
+
+        echo "adding $CI_REGISTRY/$GITHUB_REPOSITORY to registry targets"
 
     - name: add additional registries
       shell: bash
@@ -141,7 +140,7 @@ runs:
             REGISTRY="$REGISTRY:"
           fi
 
-          debug_log "adding $REGISTRY to REGISTRY_TARGETS"
+          echo "adding $REGISTRY to REGISTRY_TARGETS"
 
           REGISTRY_TARGETS="$REGISTRY_TARGETS,$REGISTRY"
         done
