@@ -257,4 +257,7 @@ runs:
 
     - name: debug print env
       shell: bash
-      run: env
+      run: |
+        echo "printing env"
+        env
+    
