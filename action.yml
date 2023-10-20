@@ -114,10 +114,10 @@ runs:
       run: |
         # TODO candidate for extraction to common information gathering role
         # extract base hostname from server url
-        CI_REGISTRY=$(echo $GITHUB_SERVER_URL | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/')
+        CI_REGISTRY="${{ steps.information.outputs.ci_hostname }}"
 
         echo "CI_REGISTRY=$CI_REGISTRY" >> $GITHUB_ENV
-        echo "::debug::extracted CI_REGISTRY=$CI_REGISTRY from GITHUB_SERVER_URL=$GITHUB_SERVER_URL"
+        echo "::debug::using CI_REGISTRY=$CI_REGISTRY"
 
         REGISTRY_TARGETS="$CI_REGISTRY/$GITHUB_REPOSITORY:" # needs to have : suffix
         echo "REGISTRY_TARGETS=$REGISTRY_TARGETS" >> $GITHUB_ENV
