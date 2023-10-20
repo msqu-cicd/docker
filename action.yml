@@ -6,81 +6,81 @@ inputs:
     description: docker client image to use for building images
     default: "docker:latest"
 
-  docker-args:
+  docker_args:
     description: "Extra arguments to pass to docker invocation"
     default: ""
 
-  tag-prefix:
+  tag_prefix:
     description: "a prefix to add to all docker tags"
 
-  tag-suffix:
+  tag_suffix:
     description: "a suffix to add to all docker tags"
 
-  tag-commit-enable:
+  tag_commit_enable:
     description: "generate docker tags for git tag if present"
     default: "true"
 
-  tag-commit-prefix:
+  tag_commit_prefix:
     description: "a suffix to add to docker tags that were generated from commit sha"
     default: "commit-"
 
-  tag-ref-slug-enable:
+  tag_ref_slug_enable:
     description: "generate a tag from the git ref slug"
     default: "false"
 
-  tag-ref-normalized-enable:
+  tag_ref_normalized_enable:
     description: ""
     default: "true"
 
-  tag-semver-major:
+  tag_semver_major:
     description: ""
     default: "true"
 
-  tag-semver-minor:
+  tag_semver_minor:
     description: ""
     default: "true"
 
-  tag-semver-patch:
+  tag_semver_patch:
     description: ""
     default: "true"
 
-  additional-registry-destinations:
+  additional_registry_destinations:
     description: "a list of --destination registry/orga/repo:tag strings, space separated"
     default: ""
 
-  squash-layers:
+  squash_layers:
     description: ""
     default: "true"
 
-  additional-registries:
+  additional_registries:
     description: ""
     default: ""
 
-  add-ci-registry-auth:
+  add_ci_registry_auth:
     description: ""
     default: "true"
 
-  add-ci-registry-target:
+  add_ci_registry_target:
     description: ""
     default: "true"
 
-  registry-auth-json:
+  registry_auth_json:
     description: ""
     default: ""
 
-  merge-registry-json:
+  merge_registry_json:
     description: ""
     default: "true"
 
-  push-tags:
+  push_tags:
     description: ""
     default: "true"
 
-  docker-buildkit:
+  docker_buildkit:
     description: ""
     default: "1"
 
-  docker-multi-arch:
+  docker_multi_arch:
     description: ""
     default: "false"
 
@@ -88,16 +88,16 @@ inputs:
     description: "Dockerfile used to build images"
     default: "Dockerfile"
 
-  docker-context-dir:
+  docker_context_dir:
     description: "${{ github.workspace }}"
 
-  ci-registry-password:
+  ci_registry_password:
     description: "password/token for default ci registry, should usually be set to secret value with ${{ secrets.someSecretName }} for gitea"
     default: ""
     required: false
 
 outputs:
-  published-tags:
+  published_tags:
     description: "Published tags as csv"
     value: ""
 
@@ -110,7 +110,7 @@ runs:
   
     - name: add ci registry to targets
       shell: bash
-      if: inputs.add-ci-registry-target == 'true'
+      if: inputs.add_ci_registry_target == 'true'
       run: |
         # TODO candidate for extraction to common information gathering role
         # extract base hostname from server url
@@ -128,7 +128,7 @@ runs:
       shell: bash
       run: |
         IFS=","
-        for REGISTRY in $ADDITIONAL_REGISTRIES; do
+        for REGISTRY in $INPUT_ADDITIONAL_REGISTRIES; do
           # add ":" to registry paths missing it
           if [[ "$REGISTRY" != *":"* ]]; then
             REGISTRY="$REGISTRY:"
@@ -144,14 +144,14 @@ runs:
 
     - name: add ci registry auth
       shell: bash
-      if: inputs.add-ci-registry-auth == 'true'
+      if: inputs.add_ci_registry_auth == 'true'
       run: |
         REGISTRY_AUTH_JSON="$REGISTRY_AUTH_JSON {\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n token:$CI_REGISTRY_PASSWORD | base64)\"}}}"
         echo "REGISTRY_AUTH_JSON=$REGISTRY_AUTH_JSON" >> $GITHUB_ENV
 
     - name: merge registry auth json
       shell: bash
-      if: inputs.merge-registry-auth-json == 'true'
+      if: inputs.merge_registry_auth_json == 'true'
       run: |
         if [[ ! -z "$REGISTRY_AUTH_JSON" ]]; then
           REGISTRY_AUTH_JSON=$(echo "$REGISTRY_AUTH_JSON" | jq --slurp 'reduce .[] as $item ({}; . * $item)')
@@ -170,23 +170,23 @@ runs:
       shell: bash
       run: |
         if [[ "$INPUT_TAG_COMMIT_ENABLE" == "true" ]]; then
-          IMAGE_TAGS="$IMAGE_TAGS,$TAG_PREFIX$TAG_COMMIT_PREFIX$CI_COMMIT_SHA$TAG_SUFFIX"
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$INPUT_TAG_COMMIT_PREFIX$CI_COMMIT_SHA$INPUT_TAG_SUFFIX"
         fi
 
         # TODO extract semver vars from tag/branch, candidate for refactor to common info gathering action
         # add semver major tag              if enabled and available, exclude "0"     tag
         # add semver major.minor tag        if enabled and available, exclude "0.0"   tag
         # add semver major.minor.patch tag  if enabled and available, exclude "0.0.0" tag
-        if [[ "$TAG_SEMVER_MAJOR" == "true" ]] && [[ ! -z $SEMVER_MAJOR ]] && [[ "$SEMVER_MAJOR" != "0" ]]; then
-          IMAGE_TAGS="$IMAGE_TAGS,$TAG_PREFIX$SEMVER_MAJOR"
+        if [[ "$INPUT_TAG_SEMVER_MAJOR" == "true" ]] && [[ ! -z $SEMVER_MAJOR ]] && [[ "$SEMVER_MAJOR" != "0" ]]; then
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$SEMVER_MAJOR"
           TAG_REF_NORMALIZED_ENABLE=0
         fi
-        if [[ "$TAG_SEMVER_MINOR" == "true" ]] && [[ ! -z $SEMVER_MINOR ]] && [[ "$SEMVER_MAJOR_MINOR" != "0.0" ]]; then
-          IMAGE_TAGS="$IMAGE_TAGS,$TAG_PREFIX$SEMVER_MAJOR_MINOR"
+        if [[ "$INPUT_TAG_SEMVER_MINOR" == "true" ]] && [[ ! -z $SEMVER_MINOR ]] && [[ "$SEMVER_MAJOR_MINOR" != "0.0" ]]; then
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$SEMVER_MAJOR_MINOR"
           TAG_REF_NORMALIZED_ENABLE=0
         fi
-        if [[ "$TAG_SEMVER_PATCH" == "true" ]] && [[ ! -z $SEMVER_PATCH ]] && [[ "$SEMVER_MAJOR_MINOR_PATCH" != "0.0.0" ]]; then
-          IMAGE_TAGS="$IMAGE_TAGS,$TAG_PREFIX$SEMVER_MAJOR_MINOR_PATCH"
+        if [[ "$INPUT_TAG_SEMVER_PATCH" == "true" ]] && [[ ! -z $SEMVER_PATCH ]] && [[ "$SEMVER_MAJOR_MINOR_PATCH" != "0.0.0" ]]; then
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$SEMVER_MAJOR_MINOR_PATCH"
           TAG_REF_NORMALIZED_ENABLE=0
         fi
 
@@ -194,15 +194,14 @@ runs:
         # - dont add tag if semver tags were added
         # - attempt to build tag first
         # - attempt to build branch if not a PR (if not PR for extra security, variable description on drone unclear)
-        echo "TAG_REF_NORMALIZED_ENABLE=$TAG_REF_NORMALIZED_ENABLE"
-        if [[ "$TAG_REF_NORMALIZED_ENABLE" == "true" ]] && [[ ! -z $DRONE_TAG ]]; then
-          echo "adding tag for tag"
+        if [[ "$INPUT_TAG_REF_NORMALIZED_ENABLE" == "true" ]] && [[ ! -z $DRONE_TAG ]]; then
+          echo "::debug::adding docker tag for git tag"
           REF_TAG_NORMALIZED=$(echo $DRONE_TAG | sed s:/:-:g)
-          IMAGE_TAGS="$IMAGE_TAGS,$TAG_PREFIX$REF_TAG_NORMALIZED$TAG_SUFFIX"
-        elif [[ "$TAG_REF_NORMALIZED_ENABLE" == "true" ]] && [[ -z "$DRONE_PULL_REQUEST" ]] && [[ ! -z $DRONE_BRANCH ]]; then
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$REF_TAG_NORMALIZED$INPUT_TAG_SUFFIX"
+        elif [[ "$INPUT_TAG_REF_NORMALIZED_ENABLE" == "true" ]] && [[ -z "$DRONE_PULL_REQUEST" ]] && [[ ! -z $DRONE_BRANCH ]]; then
           echo "adding tag for branch"
           REF_TAG_NORMALIZED=$(echo $DRONE_BRANCH | sed s:/:-:g)
-          IMAGE_TAGS="$IMAGE_TAGS,$TAG_PREFIX$REF_TAG_NORMALIZED$TAG_SUFFIX"
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$REF_TAG_NORMALIZED$INPUT_TAG_SUFFIX"
         fi
 
         # prepare destinations by combining registries + tags
@@ -234,19 +233,20 @@ runs:
         if [[ -z "$DOCKER_ARGS" ]]; then
           DOCKER_ARGS=""
         fi
-        DOCKER_ARGS="$CONTEXT_DIR --file $DOCKERFILE $DOCKER_ARGS"
+        DOCKER_ARGS="$INPUT_CONTEXT_DIR --file $INPUT_DOCKERFILE $INPUT_DOCKER_ARGS $DOCKER_ARGS"
 
-        if [[ "$SQUASH_LAYERS" == "true" ]]; then
+        if [[ "$INPUT_SQUASH_LAYERS" == "true" ]]; then
           DOCKER_ARGS="$DOCKER_ARGS --squash"
         fi
         if [[ -z "$IMAGE_DESTS" ]]; then
           DOCKER_ARGS="$DOCKER_ARGS $IMAGE_DESTS"
         fi
-        if [[ -z "$ADDITIONAL_REGISTRY_DESTINATIONS" ]]; then
-          DOCKER_ARGS="$DOCKER_ARGS $ADDITIONAL_REGISTRY_DESTINATIONS"
+        if [[ -z "$INPUT_ADDITIONAL_REGISTRY_DESTINATIONS" ]]; then
+          DOCKER_ARGS="$DOCKER_ARGS $INPUT_ADDITIONAL_REGISTRY_DESTINATIONS"
         fi
 
         echo "DOCKER_ARGS=$DOCKER_ARGS" >> $GITHUB_ENV
+        echo "::debug:: DOCKER_ARGS=$DOCKER_ARGS"
 
     - name: debug print env
       shell: bash
