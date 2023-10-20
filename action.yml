@@ -119,7 +119,7 @@ runs:
         echo "CI_REGISTRY=$CI_REGISTRY" >> $GITHUB_ENV
         echo "::debug::extracted CI_REGISTRY=$CI_REGISTRY from GITHUB_SERVER_URL=$GITHUB_SERVER_URL"
 
-        REGISTRY_TARGETS="$CI_REGISTRY/$GITHUB_REPOSITORY"
+        REGISTRY_TARGETS="$CI_REGISTRY/$GITHUB_REPOSITORY:" # needs to have : suffix
         echo "REGISTRY_TARGETS=$REGISTRY_TARGETS" >> $GITHUB_ENV
 
         echo "::debug::adding $CI_REGISTRY/$GITHUB_REPOSITORY to registry targets"
@@ -170,7 +170,7 @@ runs:
       shell: bash
       run: |
         if [[ "$INPUT_TAG_COMMIT_ENABLE" == "true" ]]; then
-          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$INPUT_TAG_COMMIT_PREFIX$CI_COMMIT_SHA$INPUT_TAG_SUFFIX"
+          IMAGE_TAGS="$IMAGE_TAGS,$INPUT_TAG_PREFIX$INPUT_TAG_COMMIT_PREFIX$GITHUB_SHA$INPUT_TAG_SUFFIX"
         fi
 
         # TODO extract semver vars from tag/branch, candidate for refactor to common info gathering action
