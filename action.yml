@@ -106,7 +106,7 @@ runs:
   steps:
     - name: "dummy step"
       shell: bash
-      run: echo dummy step
+      run: echo dummy step changed
   
     - name: add ci registry to targets
       shell: bash
