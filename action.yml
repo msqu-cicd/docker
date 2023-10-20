@@ -117,12 +117,12 @@ runs:
         CI_REGISTRY=$(echo $GITHUB_SERVER_URL | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/')
 
         echo "CI_REGISTRY=$CI_REGISTRY" >> $GITHUB_ENV
-        echo "extract CI_REGISTRY=$CI_REGISTRY"
+        echo "::debug::extracted CI_REGISTRY=$CI_REGISTRY from GITHUB_SERVER_URL=$GITHUB_SERVER_URL"
 
         REGISTRY_TARGETS="$CI_REGISTRY/$GITHUB_REPOSITORY"
         echo "REGISTRY_TARGETS=$REGISTRY_TARGETS" >> $GITHUB_ENV
 
-        echo "adding $CI_REGISTRY/$GITHUB_REPOSITORY to registry targets"
+        echo "::debug::adding $CI_REGISTRY/$GITHUB_REPOSITORY to registry targets"
 
     - name: add additional registries
       shell: bash
@@ -134,13 +134,13 @@ runs:
             REGISTRY="$REGISTRY:"
           fi
 
-          echo "adding $REGISTRY to REGISTRY_TARGETS"
+          echo "::debug::adding $REGISTRY to REGISTRY_TARGETS"
 
           REGISTRY_TARGETS="$REGISTRY_TARGETS,$REGISTRY"
         done
         IFS="$OLD_IFS"
 
-        echo "REGISTRY_TARGETS=$REGISTRY_TARGETS" >> $GITHUB_ENV
+        echo "::debug::REGISTRY_TARGETS=$REGISTRY_TARGETS" >> $GITHUB_ENV
 
     - name: add ci registry auth
       shell: bash
@@ -215,7 +215,7 @@ runs:
 
           for IMAGE_TAG in $IMAGE_TAGS; do
             if [[ -z "$IMAGE_TAG" ]]; then continue; fi
-            echo "- $REGISTRY$IMAGE_TAG"
+            echo "::debug::- $REGISTRY$IMAGE_TAG"
             IMAGE_DESTS="$IMAGE_DESTS --tag $REGISTRY$IMAGE_TAG"
             IMAGE_DESTS_PUSH="$IMAGE_DESTS_PUSH $REGISTRY$IMAGE_TAG"
           done
@@ -251,6 +251,6 @@ runs:
     - name: debug print env
       shell: bash
       run: |
-        echo "printing env"
-        env
+        echo "::debug::printing env"
+        echo "::debug:: $(env)"
     
