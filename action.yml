@@ -162,8 +162,8 @@ runs:
       shell: bash
       run: |
         if [[ ! -z "$REGISTRY_AUTH_JSON" ]]; then
-          mkdir -p /root/.docker
-          echo "$REGISTRY_AUTH_JSON" > /root/.docker/config.json
+          mkdir -p /home/runner/.docker
+          echo "$REGISTRY_AUTH_JSON" > /home/runner/.docker/config.json
         fi
   
     - name: collect tags
