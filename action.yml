@@ -108,7 +108,10 @@ outputs:
 runs:
   using: "composite"
   steps:
-    
+    - name: "dummy step"
+      shell: bash
+      run: echo dummy step
+  
     - name: add ci registry to targets
       shell: bash
       if: ${{ inputs.add-ci-registry-target == "true" }}
