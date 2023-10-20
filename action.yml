@@ -114,7 +114,7 @@ runs:
   
     - name: add ci registry to targets
       shell: bash
-      if: ${{ inputs.add-ci-registry-target == "true" }}
+      if: ${{ inputs.add-ci-registry-target }} == "true"
       run: |
         # TODO candidate for extraction to common information gathering role
         # extract base hostname from server url
@@ -151,14 +151,14 @@ runs:
 
     - name: add ci registry auth
       shell: bash
-      if: ${{ inputs.add-ci-registry-auth }}
+      if: ${{ inputs.add-ci-registry-auth }} == "true"
       run: |
         REGISTRY_AUTH_JSON="$REGISTRY_AUTH_JSON {\"auths\":{\"$CI_REGISTRY\":{\"auth\":\"$(echo -n token:$CI_REGISTRY_PASSWORD | base64)\"}}}"
         echo "REGISTRY_AUTH_JSON=$REGISTRY_AUTH_JSON" >> $GITHUB_ENV
 
     - name: merge registry auth json
       shell: bash
-      if: ${{ inputs.merge-registry-auth-json }}
+      if: ${{ inputs.merge-registry-auth-json }} == "true"
       run: |
         if [[ ! -z "$REGISTRY_AUTH_JSON" ]]; then
           REGISTRY_AUTH_JSON=$(echo "$REGISTRY_AUTH_JSON" | jq --slurp 'reduce .[] as $item ({}; . * $item)')
