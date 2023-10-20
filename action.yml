@@ -114,13 +114,7 @@ runs:
       run: |
         # TODO candidate for extraction to common information gathering role
         # extract base hostname from server url
-        re="^(https)(:\/\/|@)([^\/:]+)[\/:]([^\/:]+)\/(.+)*$"
-        if [[ $GITHUB_SERVER_URL =~ $re ]]; then
-            CI_REGISTRY=${BASH_REMATCH[3]}
-        else
-          echo "Failed to extract hostname"
-          exit 1
-        fi
+        CI_REGISTRY=$(echo $GITHUB_SERVER_URL | sed -e 's/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/')
 
         echo "CI_REGISTRY=$CI_REGISTRY" >> $GITHUB_ENV
         echo "extract CI_REGISTRY=$CI_REGISTRY"
