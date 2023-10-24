@@ -107,7 +107,10 @@ runs:
     - name: "dummy step"
       shell: bash
       run: echo dummy step changed
-  
+
+    - id: information
+      uses: https://gitea.dhswt.de/actions/information@master
+
     - name: add ci registry to targets
       shell: bash
       if: inputs.add_ci_registry_target == 'true'
