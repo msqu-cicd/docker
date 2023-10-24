@@ -112,8 +112,9 @@ runs:
       shell: bash
       if: inputs.add_ci_registry_target == 'true'
       run: |
-        # TODO candidate for extraction to common information gathering role
-        # extract base hostname from server url
+        echo "steps.information.outputs.ci_hostname=${{ steps.information.outputs.ci_hostname }}"
+        echo "steps.information_hostname.outputs.ci_hostname=${{ steps.information_hostname.outputs.ci_hostname }}"
+
         CI_REGISTRY="${{ steps.information.outputs.ci_hostname }}"
 
         echo "CI_REGISTRY=$CI_REGISTRY" >> $GITHUB_ENV
