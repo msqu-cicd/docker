@@ -62142,7 +62142,7 @@ function addCiRegistryAuth(ci_registry, registryAuthJson) {
     return;
   }
 
-  registryAuthJson.auths[ci_registry] = gBase64.encode('token:' + argCiRegistryPassword);
+  registryAuthJson.auths[ci_registry] = {'auth': gBase64.encode('token:' + argCiRegistryPassword)};
 }
 
 function mergeArgRegistryAuthJson(registryAuthJson) {
@@ -62268,8 +62268,9 @@ function prepareDockerArgs(destinations) {
 
 function executeDockerBuild(dockerArgs) {
   const dockerArgsStr = dockerArgs.join(' ');
+  const dockerSubCmd  = core.getBooleanInput('use_buildx') ? 'buildx' : 'build';
 
-  const proc = external_child_process_namespaceObject.spawnSync('docker ' + dockerArgsStr, {
+  const proc = external_child_process_namespaceObject.spawnSync(`docker ${dockerSubCmd} ${dockerArgsStr}`, {
     shell: true,
     stdio: 'inherit',
     cwd  : getDockerContextDir()
