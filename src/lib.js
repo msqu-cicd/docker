@@ -174,6 +174,26 @@ export function prepareDockerArgs(destinations) {
     dockerArgs.push(core.getInput('additional_registry_destinations'));
   }
 
+  if (isNonEmptyStr(core.getInput('build_args'))) {
+    let buildArgs = core.getInput('build_args')
+                        .split('\n')
+                        .map(s => s.trim())
+                        .map(s => {
+                          const equalIndex = s.indexOf('=');
+                          const key        = s.substring(0, equalIndex - 1);
+                          const value      = s.substring(equalIndex + 1);
+                          return {
+                            key,
+                            value
+                          };
+                        });
+
+    console.logs('parsed build_args as: ', JSON.stringify(buildArgs, null, 2));
+    buildArgs.forEach(arg => {
+      dockerArgs.push(`--build-arg ${arg.key}="${arv.value}"`);
+    });
+  }
+
   return dockerArgs;
 }
 

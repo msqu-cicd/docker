@@ -96,6 +96,11 @@ inputs:
     default: ""
     required: false
 
+  build_args:
+    description: "list of docker build args to pass to docker (--build-arg key1=value1) as newline seperated multiline string, eg key1=value1\nkey2=value2"
+    default: ""
+    required: false
+
 outputs:
   published_tags:
     description: "Published tags as csv"
