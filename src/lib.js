@@ -2,6 +2,7 @@ import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as fs from 'fs';
 import {Base64} from 'js-base64';
+import * as path from 'path';
 
 export function processAdditionalRegistries(targetRegistries) {
   const additionalRegistries = core.getInput('additional_registries');
@@ -56,7 +57,7 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
         }
       }
     }
-    catch (e) {
+    catch (error) {
       console.log('Failed to parse registry auth json', e);
       core.setFailed(error.message);
       process.exit(1);
@@ -64,8 +65,9 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
   }
 }
 
-export function writeRegistryAuthJson(registryAuthJson, path) {
-  fs.writeFileSync(path, JSON.stringify(registryAuthJson, null, 2));
+export function writeRegistryAuthJson(registryAuthJson, targetFile) {
+  fs.mkdirSync(path.dirname(targetFile), {recursive: true});
+  fs.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 
 export function collectTags() {

@@ -62095,7 +62095,10 @@ const gBase64 = {
 // and finally,
 
 
+// EXTERNAL MODULE: external "path"
+var external_path_ = __nccwpck_require__(1017);
 ;// CONCATENATED MODULE: ./src/lib.js
+
 
 
 
@@ -62154,7 +62157,7 @@ function mergeArgRegistryAuthJson(registryAuthJson) {
         }
       }
     }
-    catch (e) {
+    catch (error) {
       console.log('Failed to parse registry auth json', e);
       core.setFailed(error.message);
       process.exit(1);
@@ -62162,8 +62165,9 @@ function mergeArgRegistryAuthJson(registryAuthJson) {
   }
 }
 
-function writeRegistryAuthJson(registryAuthJson, path) {
-  external_fs_.writeFileSync(path, JSON.stringify(registryAuthJson, null, 2));
+function writeRegistryAuthJson(registryAuthJson, targetFile) {
+  external_fs_.mkdirSync(external_path_.dirname(targetFile), {recursive: true});
+  external_fs_.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 
 function collectTags() {
@@ -62236,32 +62240,40 @@ function prepareDestinations(registries, tags) {
 
 
 
-const action_information = collect_all(true, false);
-const debug       = !!core.getInput('debug');
 
-let targetRegistries = [];
-const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
+try {
+  const information = collect_all(true, false);
+  const debug       = !!core.getInput('debug');
 
-let ci_registry = false;
-if (core.getBooleanInput('add_ci_registry_target')) {
-  ci_registry = action_information.ci_hostname + '/' + repoStr;
-  targetRegistries.push(ci_registry);
+  let targetRegistries = [];
+  const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
+
+  let ci_registry = false;
+  if (core.getBooleanInput('add_ci_registry_target')) {
+    ci_registry = information.ci_hostname + '/' + repoStr;
+    targetRegistries.push(ci_registry);
+  }
+
+  processAdditionalRegistries();
+  const registryAuthJson = {auths: {}};
+  addCiRegistryAuth(ci_registry, registryAuthJson);
+  mergeArgRegistryAuthJson(registryAuthJson);
+  writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
+
+  const tags = collectTags();
+  if (debug) {
+    console.log('tags:', JSON.stringify(tags, null, 2));
+  }
+
+  const destinations = prepareDestinations(targetRegistries, tags);
+  if (debug) {
+    console.log('destinations:', JSON.stringify(tags, null, 2));
+  }
 }
-
-processAdditionalRegistries();
-const registryAuthJson = {auths: {}};
-addCiRegistryAuth(ci_registry, registryAuthJson);
-mergeArgRegistryAuthJson(registryAuthJson);
-writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
-
-const tags = collectTags();
-if (debug) {
-  console.log('tags:', JSON.stringify(tags, null, 2));
-}
-
-const destinations = prepareDestinations(targetRegistries, tags);
-if (debug) {
-  console.log('destinations:', JSON.stringify(tags, null, 2));
+catch (error) {
+  console.log('Failed to build docker image', e);
+  core.setFailed(error.message);
+  process.exit(1);
 }
 
 })();
