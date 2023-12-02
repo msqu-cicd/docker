@@ -166,7 +166,7 @@ export function prepareDockerArgs(destinations) {
 
 export function executeDockerBuild(dockerArgs) {
   const dockerArgsStr = dockerArgs.join(' ');
-  const dockerSubCmd  = core.getBooleanInput('use_buildx') ? 'buildx' : 'build';
+  const dockerSubCmd  = core.getBooleanInput('use_buildx') ? 'buildx build' : 'build';
 
   const proc = child_process.spawnSync(`docker ${dockerSubCmd} ${dockerArgsStr}`, {
     shell: true,
