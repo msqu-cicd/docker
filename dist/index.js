@@ -62307,7 +62307,7 @@ try {
 
   const dockerArgs = prepareDockerArgs(destinations);
   if (debug) {
-    console.log('dockerArgs:', JSON.stringify(destinations, null, 2));
+    console.log('dockerArgs:', JSON.stringify(dockerArgs, null, 2));
   }
 }
 catch (error) {
