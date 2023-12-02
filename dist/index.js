@@ -62251,6 +62251,17 @@ function prepareDockerArgs(destinations) {
 
   dockerArgs.unshift(getDockerContextDir());
 
+  if (isNonEmptyStr(core.getInput('docker_arch_list'))) {
+    if (!core.getBooleanInput('use_buildx')) {
+      throw new Error('Unsupported configuration: Cannot build multiarch without enabling buildx');
+    }
+    let archList = (core.getInput('docker_arch_list'));
+    if (archList === 'true' || archList === '1') {
+      archList = 'linux/amd64,linux/arm64';
+    }
+    dockerArgs.push('--platform ' + archList);
+  }
+
   if (core.getBooleanInput('squash_layers')) {
     dockerArgs.push('--squash');
   }
@@ -62300,7 +62311,6 @@ function executeDockerBuild(dockerArgs, destinations) {
     throw new Error('docker build failed');
   }
 
-  console.log('proc error check'); // TODO remove debug
   if (proc.error != null) {
     throw proc.error;
   }
