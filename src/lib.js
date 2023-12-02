@@ -190,7 +190,7 @@ export function prepareDockerArgs(destinations) {
 
     console.log('parsed build_args as: ', JSON.stringify(buildArgs, null, 2));
     buildArgs.forEach(arg => {
-      dockerArgs.push(`--build-arg ${arg.key}="${arv.value}"`);
+      dockerArgs.push(`--build-arg ${arg.key}="${arg.value}"`);
     });
   }
 
