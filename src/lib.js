@@ -1,6 +1,7 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 import * as fs from 'fs';
+import {Base64} from 'js-base64';
 
 export function processAdditionalRegistries(targetRegistries) {
   const additionalRegistries = core.getInput('additional_registries');
@@ -39,9 +40,7 @@ export function addCiRegistryAuth(ci_registry, registryAuthJson) {
     return;
   }
 
-  registryAuthJson.auths[ci_registry] = base64ToBytes(
-    'token:' + argCiRegistryPassword
-  );
+  registryAuthJson.auths[ci_registry] = Base64.encode('token:' + argCiRegistryPassword);
 }
 
 export function mergeArgRegistryAuthJson(registryAuthJson) {
