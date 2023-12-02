@@ -62267,7 +62267,7 @@ try {
 
   const destinations = prepareDestinations(targetRegistries, tags);
   if (debug) {
-    console.log('destinations:', JSON.stringify(tags, null, 2));
+    console.log('destinations:', JSON.stringify(destinations, null, 2));
   }
 }
 catch (error) {
