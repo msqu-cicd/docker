@@ -61795,6 +61795,8 @@ function collect_all(debug = false, output = false) {
 }
 
 
+;// CONCATENATED MODULE: external "child_process"
+const external_child_process_namespaceObject = require("child_process");
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __nccwpck_require__(7147);
 ;// CONCATENATED MODULE: ./node_modules/js-base64/base64.mjs
@@ -62104,6 +62106,7 @@ var external_path_ = __nccwpck_require__(1017);
 
 
 
+
 function processAdditionalRegistries(targetRegistries) {
   const additionalRegistries = core.getInput('additional_registries');
   if (additionalRegistries != null && additionalRegistries.length > 0) {
@@ -62224,6 +62227,15 @@ function prepareDestinations(registries, tags) {
   return destinations;
 }
 
+function getDockerContextDir() {
+  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
+    return core.getInput('docker_context_dir');
+  }
+  else {
+    return process.env['GITHUB_WORKSPACE'];
+  }
+}
+
 function prepareDockerArgs(destinations) {
   let dockerArgs = (core.getInput('docker_args') ?? '').trim();
   if (dockerArgs.length > 0) {
@@ -62237,12 +62249,7 @@ function prepareDockerArgs(destinations) {
     dockerArgs.unshift('--file ' + core.getInput('dockerfile'));
   }
 
-  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
-    dockerArgs.unshift(core.getInput('docker_context_dir'));
-  }
-  else {
-    dockerArgs.unshift(process.env['GITHUB_WORKSPACE']);
-  }
+  dockerArgs.unshift(getDockerContextDir());
 
   if (core.getBooleanInput('squash_layers')) {
     dockerArgs.push('--squash');
@@ -62257,6 +62264,28 @@ function prepareDockerArgs(destinations) {
   }
 
   return dockerArgs;
+}
+
+function lib_executeDockerBuild(dockerArgs) {
+  const dockerArgsStr = dockerArgs.join(' ');
+
+  const proc = child_process.spawnSync('docker ' + dockerArgsStr, {
+    shell: true,
+    stdio: 'inherit',
+    cwd  : getDockerContextDir()
+  });
+
+  // proc.on('exit', function (code, signal) {
+  //   console.log(`docker process exited with code ${code} and signal ${signal}`);
+  // });
+
+  // proc.stdout.on('data', (data) => {
+  //   console.log(`docker: ${data}`);
+  // });
+  //
+  // proc.stderr.on('data', (data) => {
+  //   console.error(`docker: ${data}`);
+  // });
 }
 
 ;// CONCATENATED MODULE: ./src/action.js
@@ -62301,6 +62330,8 @@ try {
   if (debug) {
     console.log('dockerArgs:', JSON.stringify(dockerArgs, null, 2));
   }
+
+  executeDockerBuild(dockerArgs);
 }
 catch (error) {
   console.log('Failed to build docker image', error);

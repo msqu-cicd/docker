@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
+import * as child_process from 'child_process';
 import * as fs from 'fs';
 import {Base64} from 'js-base64';
 import * as path from 'path';
@@ -124,6 +125,15 @@ export function prepareDestinations(registries, tags) {
   return destinations;
 }
 
+export function getDockerContextDir() {
+  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
+    return core.getInput('docker_context_dir');
+  }
+  else {
+    return process.env['GITHUB_WORKSPACE'];
+  }
+}
+
 export function prepareDockerArgs(destinations) {
   let dockerArgs = (core.getInput('docker_args') ?? '').trim();
   if (dockerArgs.length > 0) {
@@ -137,12 +147,7 @@ export function prepareDockerArgs(destinations) {
     dockerArgs.unshift('--file ' + core.getInput('dockerfile'));
   }
 
-  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
-    dockerArgs.unshift(core.getInput('docker_context_dir'));
-  }
-  else {
-    dockerArgs.unshift(process.env['GITHUB_WORKSPACE']);
-  }
+  dockerArgs.unshift(getDockerContextDir());
 
   if (core.getBooleanInput('squash_layers')) {
     dockerArgs.push('--squash');
@@ -157,4 +162,26 @@ export function prepareDockerArgs(destinations) {
   }
 
   return dockerArgs;
+}
+
+export function executeDockerBuild(dockerArgs) {
+  const dockerArgsStr = dockerArgs.join(' ');
+
+  const proc = child_process.spawnSync('docker ' + dockerArgsStr, {
+    shell: true,
+    stdio: 'inherit',
+    cwd  : getDockerContextDir()
+  });
+
+  // proc.on('exit', function (code, signal) {
+  //   console.log(`docker process exited with code ${code} and signal ${signal}`);
+  // });
+
+  // proc.stdout.on('data', (data) => {
+  //   console.log(`docker: ${data}`);
+  // });
+  //
+  // proc.stderr.on('data', (data) => {
+  //   console.error(`docker: ${data}`);
+  // });
 }
