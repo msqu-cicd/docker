@@ -70,7 +70,7 @@ export function writeRegistryAuthJson(registryAuthJson, targetFile) {
   fs.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 
-export function collectTags() {
+export function collectTags(information) {
   const tags          = [];
   let foundSemverTag  = false;
   let tagPrefix       = (core.getInput('tag_prefix') ?? '').trim();

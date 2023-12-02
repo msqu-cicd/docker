@@ -30,7 +30,7 @@ try {
   mergeArgRegistryAuthJson(registryAuthJson);
   writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
 
-  const tags = collectTags();
+  const tags = collectTags(information);
   if (debug) {
     console.log('tags:', JSON.stringify(tags, null, 2));
   }

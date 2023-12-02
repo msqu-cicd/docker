@@ -62170,7 +62170,7 @@ function writeRegistryAuthJson(registryAuthJson, targetFile) {
   external_fs_.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 
-function collectTags() {
+function collectTags(information) {
   const tags          = [];
   let foundSemverTag  = false;
   let tagPrefix       = (core.getInput('tag_prefix') ?? '').trim();
@@ -62260,7 +62260,7 @@ try {
   mergeArgRegistryAuthJson(registryAuthJson);
   writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
 
-  const tags = collectTags();
+  const tags = collectTags(information);
   if (debug) {
     console.log('tags:', JSON.stringify(tags, null, 2));
   }
