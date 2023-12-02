@@ -174,15 +174,7 @@ export function executeDockerBuild(dockerArgs) {
     cwd  : getDockerContextDir()
   });
 
-  // proc.on('exit', function (code, signal) {
-  //   console.log(`docker process exited with code ${code} and signal ${signal}`);
-  // });
-
-  // proc.stdout.on('data', (data) => {
-  //   console.log(`docker: ${data}`);
-  // });
-  //
-  // proc.stderr.on('data', (data) => {
-  //   console.error(`docker: ${data}`);
-  // });
+  if (proc.error != null) {
+    throw proc.error;
+  }
 }
