@@ -62282,7 +62282,7 @@ function prepareDockerArgs(destinations) {
                         .map(s => s.trim())
                         .map(s => {
                           const equalIndex = s.indexOf('=');
-                          const key        = s.substring(0, equalIndex - 1);
+                          const key        = s.substring(0, equalIndex);
                           const value      = s.substring(equalIndex + 1);
                           return {
                             key,
