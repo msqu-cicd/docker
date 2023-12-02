@@ -10,8 +10,8 @@ export function processAdditionalRegistries(targetRegistries) {
     const additionalRegistriesArr = additionalRegistries.split(',');
     for (let registry of additionalRegistriesArr) {
       registry = registry.trim();
-      if (!registry.endsWith(':')) {
-        registry += ':';
+      if (registry.endsWith(':')) {
+        registry = registry.substring(0, registry.length - 1);
       }
       targetRegistries.push(registry);
     }
@@ -70,31 +70,32 @@ export function writeRegistryAuthJson(registryAuthJson, targetFile) {
   fs.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 
+function isNonEmptyStr(str) {
+  return str != null && str !== 'false' && str.length > 0;
+}
+
 export function collectTags(information) {
   const tags          = [];
   let foundSemverTag  = false;
   let tagPrefix       = (core.getInput('tag_prefix') ?? '').trim();
   let tagSuffix       = (core.getInput('tag_suffix') ?? '').trim();
-  let tagCommitPrefix = (core.getInput('tag_suffix') ?? '').trim();
+  let tagCommitPrefix = (core.getInput('tag_commit_prefix') ?? '').trim();
 
   // handle semver
   if (
-    core.getBooleanInput('tag_semver_major') &&
-    information.semver_major != null
+    core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)
   ) {
     tags.push(tagPrefix + information.semver_major);
     foundSemverTag = true;
   }
   if (
-    core.getBooleanInput('tag_semver_minor') &&
-    information.semver_minor != null
+    core.getBooleanInput('tag_semver_minor') && isNonEmptyStr(information.semver_minor)
   ) {
     tags.push(tagPrefix + information.semver_minor);
     foundSemverTag = true;
   }
   if (
-    core.getBooleanInput('tag_semver_patch') &&
-    information.semver_patch != null
+    core.getBooleanInput('tag_semver_patch') && isNonEmptyStr(information.semver_patch)
   ) {
     tags.push(tagPrefix + information.semver_patch);
     foundSemverTag = true;
@@ -105,18 +106,18 @@ export function collectTags(information) {
     core.getBooleanInput('tag_ref_normalized_enable') &&
     foundSemverTag === false
   ) {
-    if (information.git_tag != null) {
+    if (isNonEmptyStr(information.git_tag)) {
       // TODO normalize tag from git for docker
       tags.push(tagPrefix + information.git_tag + tagSuffix);
     }
-    if (information.git_current_branch != null) {
+    if (isNonEmptyStr(information.git_current_branch)) {
       // TODO normalize branch from git for docker
       tags.push(tagPrefix + information.git_current_branch + tagSuffix);
     }
   }
 
   // handle commit sha
-  if (core.getBooleanInput('tag_commit_enable')) {
+  if (core.getBooleanInput('tag_commit_enable') && isNonEmptyStr(github.context.sha)) {
     tags.push(tagPrefix + tagCommitPrefix + github.context.sha + tagSuffix);
   }
 
