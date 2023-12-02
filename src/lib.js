@@ -128,7 +128,7 @@ export function prepareDestinations(registries, tags) {
   const destinations = [];
   registries.forEach((registry) => {
     tags.forEach((tag) => {
-      destinations.push(registry + tag);
+      destinations.push(registry + ':' + tag);
     });
   });
 
