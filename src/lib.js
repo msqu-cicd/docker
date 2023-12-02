@@ -29,9 +29,7 @@ export function addCiRegistryAuth(ci_registry, registryAuthJson) {
   }
 
   if (ci_registry === false || ci_registry.length <= 0) {
-    console.log(
-      'WARNING: add_ci_registry_auth enabled but ci_registry is not set'
-    );
+    console.log('WARNING: add_ci_registry_auth enabled but ci_registry is not set');
     return;
   }
 
@@ -82,30 +80,21 @@ export function collectTags(information) {
   let tagCommitPrefix = (core.getInput('tag_commit_prefix') ?? '').trim();
 
   // handle semver
-  if (
-    core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)
-  ) {
+  if (core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)) {
     tags.push(tagPrefix + information.semver_major);
     foundSemverTag = true;
   }
-  if (
-    core.getBooleanInput('tag_semver_minor') && isNonEmptyStr(information.semver_minor)
-  ) {
+  if (core.getBooleanInput('tag_semver_minor') && isNonEmptyStr(information.semver_minor)) {
     tags.push(tagPrefix + information.semver_minor);
     foundSemverTag = true;
   }
-  if (
-    core.getBooleanInput('tag_semver_patch') && isNonEmptyStr(information.semver_patch)
-  ) {
+  if (core.getBooleanInput('tag_semver_patch') && isNonEmptyStr(information.semver_patch)) {
     tags.push(tagPrefix + information.semver_patch);
     foundSemverTag = true;
   }
 
   // handle git tag/branch
-  if (
-    core.getBooleanInput('tag_ref_normalized_enable') &&
-    foundSemverTag === false
-  ) {
+  if (core.getBooleanInput('tag_ref_normalized_enable') && foundSemverTag === false) {
     if (isNonEmptyStr(information.git_tag)) {
       // TODO normalize tag from git for docker
       tags.push(tagPrefix + information.git_tag + tagSuffix);
@@ -144,25 +133,28 @@ export function prepareDockerArgs(destinations) {
     dockerArgs = [];
   }
 
-  if(isNonEmptyStr(core.getInput("dockerfile"))) {
-    dockerArgs.unshift("--file " + core.getInput("dockerfile"))
+  if (isNonEmptyStr(core.getInput('dockerfile'))) {
+    dockerArgs.unshift('--file ' + core.getInput('dockerfile'));
   }
 
-  if(isNonEmptyStr(core.getInput("docker_context_dir"))) {
-    dockerArgs.unshift(core.getInput("docker_context_dir"))
-  } // TODO use runner workdir instead
+  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
+    dockerArgs.unshift(core.getInput('docker_context_dir'));
+  }
+  else {
+    dockerArgs.unshift(process.env['GITHUB_WORKSPACE']);
+  }
 
-  if(core.getBooleanInput("squash_layers")) {
-    dockerArgs.push("--squash")
+  if (core.getBooleanInput('squash_layers')) {
+    dockerArgs.push('--squash');
   }
 
   destinations.forEach(dest => {
-    dockerArgs.push("--tag " + dest)
-  })
+    dockerArgs.push('--tag ' + dest);
+  });
 
-  if(isNonEmptyStr(core.getInput("additional_registry_destinations"))) {
-    dockerArgs.push(core.getInput("additional_registry_destinations"))
+  if (isNonEmptyStr(core.getInput('additional_registry_destinations'))) {
+    dockerArgs.push(core.getInput('additional_registry_destinations'));
   }
 
-  return dockerArgs
+  return dockerArgs;
 }
