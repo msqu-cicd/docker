@@ -134,3 +134,35 @@ export function prepareDestinations(registries, tags) {
 
   return destinations;
 }
+
+export function prepareDockerArgs(destinations) {
+  let dockerArgs = (core.getInput('docker_args') ?? '').trim();
+  if (dockerArgs.length > 0) {
+    dockerArgs = [dockerArgs];
+  }
+  else {
+    dockerArgs = [];
+  }
+
+  if(isNonEmptyStr(core.getInput("dockerfile"))) {
+    dockerArgs.unshift("--file " + core.getInput("dockerfile"))
+  }
+
+  if(isNonEmptyStr(core.getInput("docker_context_dir"))) {
+    dockerArgs.unshift(core.getInput("docker_context_dir"))
+  } // TODO use runner workdir instead
+
+  if(core.getBooleanInput("squash_layers")) {
+    dockerArgs.push("--squash")
+  }
+
+  destinations.forEach(dest => {
+    dockerArgs.push("--tag " + dest)
+  })
+
+  if(isNonEmptyStr(core.getInput("additional_registry_destinations"))) {
+    dockerArgs.push(core.getInput("additional_registry_destinations"))
+  }
+
+  return dockerArgs
+}

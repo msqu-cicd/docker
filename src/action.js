@@ -5,7 +5,7 @@ import {
   addCiRegistryAuth,
   collectTags,
   mergeArgRegistryAuthJson,
-  prepareDestinations,
+  prepareDestinations, prepareDockerArgs,
   processAdditionalRegistries,
   writeRegistryAuthJson
 } from './lib';
@@ -13,9 +13,9 @@ import {
 
 try {
   const information = action_information.collect_all(true, false);
-  let debug       = core.getInput('debug') != null ? (!!core.getInput('debug')) : true;
-  console.log("debug=", debug)
-  debug=true
+  let debug         = core.getInput('debug') != null ? (!!core.getInput('debug')) : true;
+  console.log('debug=', debug);
+  debug = true;
 
   let targetRegistries = [];
   const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
@@ -40,6 +40,11 @@ try {
   const destinations = prepareDestinations(targetRegistries, tags);
   if (debug) {
     console.log('destinations:', JSON.stringify(destinations, null, 2));
+  }
+
+  const dockerArgs = prepareDockerArgs(destinations);
+  if (debug) {
+    console.log('dockerArgs:', JSON.stringify(destinations, null, 2));
   }
 }
 catch (error) {

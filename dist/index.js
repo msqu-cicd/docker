@@ -62235,6 +62235,38 @@ function prepareDestinations(registries, tags) {
   return destinations;
 }
 
+function prepareDockerArgs(destinations) {
+  let dockerArgs = (core.getInput('docker_args') ?? '').trim();
+  if (dockerArgs.length > 0) {
+    dockerArgs = [dockerArgs];
+  }
+  else {
+    dockerArgs = [];
+  }
+
+  if(isNonEmptyStr(core.getInput("dockerfile"))) {
+    dockerArgs.unshift("--file " + core.getInput("dockerfile"))
+  }
+
+  if(isNonEmptyStr(core.getInput("docker_context_dir"))) {
+    dockerArgs.unshift(core.getInput("docker_context_dir"))
+  } // TODO use runner workdir instead
+
+  if(core.getBooleanInput("squash_layers")) {
+    dockerArgs.push("--squash")
+  }
+
+  destinations.forEach(dest => {
+    dockerArgs.push("--tag " + dest)
+  })
+
+  if(isNonEmptyStr(core.getInput("additional_registry_destinations"))) {
+    dockerArgs.push(core.getInput("additional_registry_destinations"))
+  }
+
+  return dockerArgs
+}
+
 ;// CONCATENATED MODULE: ./src/action.js
 
 
@@ -62244,9 +62276,9 @@ function prepareDestinations(registries, tags) {
 
 try {
   const information = collect_all(true, false);
-  let debug       = core.getInput('debug') != null ? (!!core.getInput('debug')) : true;
-  console.log("debug=", debug)
-  debug=true
+  let debug         = core.getInput('debug') != null ? (!!core.getInput('debug')) : true;
+  console.log('debug=', debug);
+  debug = true;
 
   let targetRegistries = [];
   const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
@@ -62271,6 +62303,11 @@ try {
   const destinations = prepareDestinations(targetRegistries, tags);
   if (debug) {
     console.log('destinations:', JSON.stringify(destinations, null, 2));
+  }
+
+  const dockerArgs = prepareDockerArgs(destinations);
+  if (debug) {
+    console.log('dockerArgs:', JSON.stringify(destinations, null, 2));
   }
 }
 catch (error) {
