@@ -16,17 +16,15 @@ const debug       = !!core.getInput('debug');
 let targetRegistries = [];
 const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
 
+let ci_registry = false;
 if (core.getBooleanInput('add_ci_registry_target')) {
-  const ci_registry = information.ci_hostname + '/' + repoStr;
+  ci_registry = information.ci_hostname + '/' + repoStr;
   targetRegistries.push(ci_registry);
-}
-else {
-  const ci_registry = false;
 }
 
 processAdditionalRegistries();
 const registryAuthJson = {auths: {}};
-addCiRegistryAuth(registryAuthJson);
+addCiRegistryAuth(ci_registry, registryAuthJson);
 mergeArgRegistryAuthJson(registryAuthJson);
 writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
 

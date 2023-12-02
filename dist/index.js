@@ -61803,13 +61803,13 @@ var external_fs_ = __nccwpck_require__(7147);
 
 
 function processAdditionalRegistries(targetRegistries) {
-  const additionalRegistries = core.getInput("additional_registries");
+  const additionalRegistries = core.getInput('additional_registries');
   if (additionalRegistries != null && additionalRegistries.length > 0) {
-    const additionalRegistriesArr = additionalRegistries.split(",");
+    const additionalRegistriesArr = additionalRegistries.split(',');
     for (let registry of additionalRegistriesArr) {
       registry = registry.trim();
-      if (!registry.endsWith(":")) {
-        registry += ":";
+      if (!registry.endsWith(':')) {
+        registry += ':';
       }
       targetRegistries.push(registry);
     }
@@ -61822,34 +61822,30 @@ function base64ToBytes(base64) {
 }
 
 function addCiRegistryAuth(ci_registry, registryAuthJson) {
-  if (!core.getBooleanInput("add_ci_registry_auth")) {
+  if (!core.getBooleanInput('add_ci_registry_auth')) {
     return;
   }
 
   if (ci_registry === false || ci_registry.length <= 0) {
     console.log(
-      "WARNING: add_ci_registry_auth enabled but ci_registry is not set",
+      'WARNING: add_ci_registry_auth enabled but ci_registry is not set'
     );
     return;
   }
 
-  const argCiRegistryPassword = (
-    core.getInput("ci_registry_password") ?? ""
-  ).trim();
+  const argCiRegistryPassword = (core.getInput('ci_registry_password') ?? '').trim();
   if (argCiRegistryPassword == null || argCiRegistryPassword.length <= 0) {
-    console.log(
-      "WARNING: add_ci_registry_auth enabled but ci_registry_password env is empty",
-    );
+    console.log('WARNING: add_ci_registry_auth enabled but ci_registry_password env is empty');
     return;
   }
 
   registryAuthJson.auths[ci_registry] = base64ToBytes(
-    "token:" + argCiRegistryPassword,
+    'token:' + argCiRegistryPassword
   );
 }
 
 function mergeArgRegistryAuthJson(registryAuthJson) {
-  const argRegistryAuthJson = process.env["REGISTRY_AUTH_JSON"];
+  const argRegistryAuthJson = process.env['REGISTRY_AUTH_JSON'];
   if (argRegistryAuthJson != null && argRegistryAuthJson.trim().length > 0) {
     try {
       const argRegistryAuth = JSON.parse(argRegistryAuthJson);
@@ -61860,8 +61856,9 @@ function mergeArgRegistryAuthJson(registryAuthJson) {
           }
         }
       }
-    } catch (e) {
-      console.log("Failed to parse registry auth json", e);
+    }
+    catch (e) {
+      console.log('Failed to parse registry auth json', e);
       core.setFailed(error.message);
       process.exit(1);
     }
@@ -61873,29 +61870,29 @@ function writeRegistryAuthJson(registryAuthJson, path) {
 }
 
 function collectTags() {
-  const tags = [];
-  let foundSemverTag = false;
-  let tagPrefix = (core.getInput("tag_prefix") ?? "").trim();
-  let tagSuffix = (core.getInput("tag_suffix") ?? "").trim();
-  let tagCommitPrefix = (core.getInput("tag_suffix") ?? "").trim();
+  const tags          = [];
+  let foundSemverTag  = false;
+  let tagPrefix       = (core.getInput('tag_prefix') ?? '').trim();
+  let tagSuffix       = (core.getInput('tag_suffix') ?? '').trim();
+  let tagCommitPrefix = (core.getInput('tag_suffix') ?? '').trim();
 
   // handle semver
   if (
-    core.getBooleanInput("tag_semver_major") &&
+    core.getBooleanInput('tag_semver_major') &&
     information.semver_major != null
   ) {
     tags.push(tagPrefix + information.semver_major);
     foundSemverTag = true;
   }
   if (
-    core.getBooleanInput("tag_semver_minor") &&
+    core.getBooleanInput('tag_semver_minor') &&
     information.semver_minor != null
   ) {
     tags.push(tagPrefix + information.semver_minor);
     foundSemverTag = true;
   }
   if (
-    core.getBooleanInput("tag_semver_patch") &&
+    core.getBooleanInput('tag_semver_patch') &&
     information.semver_patch != null
   ) {
     tags.push(tagPrefix + information.semver_patch);
@@ -61904,7 +61901,7 @@ function collectTags() {
 
   // handle git tag/branch
   if (
-    core.getBooleanInput("tag_ref_normalized_enable") &&
+    core.getBooleanInput('tag_ref_normalized_enable') &&
     foundSemverTag === false
   ) {
     if (information.git_tag != null) {
@@ -61918,7 +61915,7 @@ function collectTags() {
   }
 
   // handle commit sha
-  if (core.getBooleanInput("tag_commit_enable")) {
+  if (core.getBooleanInput('tag_commit_enable')) {
     tags.push(tagPrefix + tagCommitPrefix + github.context.sha + tagSuffix);
   }
 
@@ -61943,32 +61940,31 @@ function prepareDestinations(registries, tags) {
 
 
 const action_information = collect_all(true, false);
-const debug = !!core.getInput("debug");
+const debug       = !!core.getInput('debug');
 
 let targetRegistries = [];
-const repoStr = github.context.repo.owner + "/" + github.context.repo.repo;
+const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
 
-if (core.getBooleanInput("add_ci_registry_target")) {
-  const ci_registry = action_information.ci_hostname + "/" + repoStr;
+let ci_registry = false;
+if (core.getBooleanInput('add_ci_registry_target')) {
+  ci_registry = action_information.ci_hostname + '/' + repoStr;
   targetRegistries.push(ci_registry);
-} else {
-  const ci_registry = false;
 }
 
 processAdditionalRegistries();
-const registryAuthJson = { auths: {} };
-addCiRegistryAuth(registryAuthJson);
+const registryAuthJson = {auths: {}};
+addCiRegistryAuth(ci_registry, registryAuthJson);
 mergeArgRegistryAuthJson(registryAuthJson);
-writeRegistryAuthJson(registryAuthJson, "/home/runner/.docker/config.json");
+writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
 
 const tags = collectTags();
 if (debug) {
-  console.log("tags:", JSON.stringify(tags, null, 2));
+  console.log('tags:', JSON.stringify(tags, null, 2));
 }
 
 const destinations = prepareDestinations(targetRegistries, tags);
 if (debug) {
-  console.log("destinations:", JSON.stringify(tags, null, 2));
+  console.log('destinations:', JSON.stringify(tags, null, 2));
 }
 
 })();
