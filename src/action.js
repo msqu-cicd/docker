@@ -3,7 +3,7 @@ import * as github from '@actions/github';
 import * as action_information from 'information';
 import {
   addCiRegistryAuth,
-  collectTags,
+  collectTags, executeDockerBuild,
   mergeArgRegistryAuthJson,
   prepareDestinations, prepareDockerArgs,
   processAdditionalRegistries,

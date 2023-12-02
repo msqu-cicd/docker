@@ -62266,10 +62266,10 @@ function prepareDockerArgs(destinations) {
   return dockerArgs;
 }
 
-function lib_executeDockerBuild(dockerArgs) {
+function executeDockerBuild(dockerArgs) {
   const dockerArgsStr = dockerArgs.join(' ');
 
-  const proc = child_process.spawnSync('docker ' + dockerArgsStr, {
+  const proc = external_child_process_namespaceObject.spawnSync('docker ' + dockerArgsStr, {
     shell: true,
     stdio: 'inherit',
     cwd  : getDockerContextDir()
