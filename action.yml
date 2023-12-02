@@ -76,9 +76,9 @@ inputs:
     description: ""
     default: "true"
 
-  docker_buildkit:
-    description: ""
-    default: "1"
+  use_buildx:
+    description: "use buildx instead of legacy build"
+    default: "true"
 
   docker_multi_arch:
     description: ""
