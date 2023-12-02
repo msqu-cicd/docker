@@ -80,7 +80,7 @@ inputs:
     description: ""
     default: "1"
 
-  docker_arch_list:
+  docker_multiarch:
     description: "if set to true use linux/amd64,linux/arm64, otherwise specifiy arch list manually"
     default: "false"
 

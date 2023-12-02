@@ -149,15 +149,17 @@ export function prepareDockerArgs(destinations) {
 
   dockerArgs.unshift(getDockerContextDir());
 
-  if (isNonEmptyStr(core.getInput('docker_arch_list'))) {
+  if (isNonEmptyStr(core.getInput('docker_multiarch'))) {
     if (!core.getBooleanInput('use_buildx')) {
       throw new Error('Unsupported configuration: Cannot build multiarch without enabling buildx');
     }
-    let archList = (core.getInput('docker_arch_list'));
+    let archList = (core.getInput('docker_multiarch'));
     if (archList === 'true' || archList === '1') {
       archList = 'linux/amd64,linux/arm64';
     }
-    dockerArgs.push('--platform ' + archList);
+    if (archList.length > 0) {
+      dockerArgs.push('--platform ' + archList);
+    }
   }
 
   if (core.getBooleanInput('squash_layers')) {
