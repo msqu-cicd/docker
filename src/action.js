@@ -41,7 +41,7 @@ try {
   }
 }
 catch (error) {
-  console.log('Failed to build docker image', e);
+  console.log('Failed to build docker image', error);
   core.setFailed(error.message);
   process.exit(1);
 }

@@ -58,7 +58,7 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
       }
     }
     catch (error) {
-      console.log('Failed to parse registry auth json', e);
+      console.log('Failed to parse registry auth json', error);
       core.setFailed(error.message);
       process.exit(1);
     }
