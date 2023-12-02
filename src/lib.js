@@ -11,8 +11,8 @@ export function processAdditionalRegistries(targetRegistries) {
     const additionalRegistriesArr = additionalRegistries.split(',');
     for (let registry of additionalRegistriesArr) {
       registry = registry.trim();
-      if (registry.endsWith(':')) {
-        registry = registry.substring(0, registry.length - 1);
+      if (!registry.contains(':')) {
+        registry += ':';
       }
       targetRegistries.push(registry);
     }
@@ -118,7 +118,7 @@ export function prepareDestinations(registries, tags) {
   const destinations = [];
   registries.forEach((registry) => {
     tags.forEach((tag) => {
-      destinations.push(registry + ':' + tag);
+      destinations.push(registry + tag);
     });
   });
 

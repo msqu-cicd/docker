@@ -3,9 +3,11 @@ import * as github from '@actions/github';
 import * as action_information from 'information';
 import {
   addCiRegistryAuth,
-  collectTags, executeDockerBuild,
+  collectTags,
+  executeDockerBuild,
   mergeArgRegistryAuthJson,
-  prepareDestinations, prepareDockerArgs,
+  prepareDestinations,
+  prepareDockerArgs,
   processAdditionalRegistries,
   writeRegistryAuthJson
 } from './lib';
@@ -22,7 +24,7 @@ try {
 
   let ci_registry = false;
   if (core.getBooleanInput('add_ci_registry_target')) {
-    ci_registry = information.ci_hostname + '/' + repoStr;
+    ci_registry = information.ci_hostname + '/' + repoStr + ':';
     targetRegistries.push(ci_registry);
   }
 
