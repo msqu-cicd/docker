@@ -72,7 +72,7 @@ inputs:
     description: ""
     default: "true"
 
-  push_tags:
+  docker_push:
     description: ""
     default: "true"
 

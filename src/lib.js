@@ -164,16 +164,41 @@ export function prepareDockerArgs(destinations) {
   return dockerArgs;
 }
 
-export function executeDockerBuild(dockerArgs) {
+export function executeDockerBuild(dockerArgs, destinations) {
   const dockerArgsStr = dockerArgs.join(' ');
-  const dockerSubCmd  = core.getBooleanInput('use_buildx') ? 'buildx build' : 'build';
+  const isBuildX      = core.getBooleanInput('use_buildx');
+  let dockerSubCmd    = isBuildX ? 'buildx build' : 'build';
+  if (core.getBooleanInput('docker_push')) {
+    dockerSubCmd += ' --push';
+  }
+  const execStr = `docker ${dockerSubCmd} ${dockerArgsStr}`;
+  console.log(`executing: ${execStr}`);
 
-  const proc = child_process.spawnSync(`docker ${dockerSubCmd} ${dockerArgsStr}`, {
+  const proc = child_process.spawnSync(execStr, {
     shell: true,
     stdio: 'inherit',
     cwd  : getDockerContextDir()
   });
 
+  // push for legacy builder
+  // if (!isBuildX && core.getBooleanInput('docker_push')) {
+  //   destinations.forEach(dst => {
+  //     const pushProc = child_process.spawnSync('docker push ' + dst, {
+  //       shell: true,
+  //       stdio: 'inherit',
+  //       cwd  : getDockerContextDir()
+  //     });
+  //     if (pushProc.status != null && pushProc.status > 0) {
+  //       throw new Error('docker push ' + dst + ' failed');
+  //     }
+  //   });
+  // }
+
+  if (proc.status != null && proc.status > 0) {
+    throw new Error('docker build failed');
+  }
+
+  console.log('proc error check'); // TODO remove debug
   if (proc.error != null) {
     throw proc.error;
   }

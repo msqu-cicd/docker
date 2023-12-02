@@ -47,7 +47,7 @@ try {
     console.log('dockerArgs:', JSON.stringify(dockerArgs, null, 2));
   }
 
-  executeDockerBuild(dockerArgs);
+  executeDockerBuild(dockerArgs, destinations);
 }
 catch (error) {
   console.log('Failed to build docker image', error);
