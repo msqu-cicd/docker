@@ -33,18 +33,14 @@ export function addCiRegistryAuth(ci_registry, registryAuthJson) {
     return;
   }
 
-  if (
-    process.env['CI_REGISTRY_PASSWORD'] == null ||
-    process.env['CI_REGISTRY_PASSWORD'].length > 0
-  ) {
-    console.log(
-      'WARNING: add_ci_registry_auth enabled but CI_REGISTRY_PASSWORD env is empty'
-    );
+  const argCiRegistryPassword = (core.getInput('ci_registry_password') ?? '').trim();
+  if (argCiRegistryPassword == null || argCiRegistryPassword.length <= 0) {
+    console.log('WARNING: add_ci_registry_auth enabled but ci_registry_password env is empty');
     return;
   }
 
   registryAuthJson.auths[ci_registry] = base64ToBytes(
-    'token:' + process.env['CI_REGISTRY_PASSWORD']
+    'token:' + argCiRegistryPassword
   );
 }
 
