@@ -19,11 +19,6 @@ export function processAdditionalRegistries(targetRegistries) {
   }
 }
 
-function base64ToBytes(base64) {
-  const binString = atob(base64);
-  return Uint8Array.from(binString, (m) => m.codePointAt(0));
-}
-
 export function addCiRegistryAuth(ci_registry, registryAuthJson) {
   if (!core.getBooleanInput('add_ci_registry_auth')) {
     return;
