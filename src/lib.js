@@ -199,6 +199,9 @@ export function executeDockerBuild(dockerArgs, destinations) {
   if (core.getBooleanInput('docker_push')) {
     dockerSubCmd += ' --push';
   }
+  if (core.getBooleanInput('docker_pull')) {
+    dockerSubCmd += ' --pull';
+  }
   const execStr = `docker ${dockerSubCmd} ${dockerArgsStr}`;
   console.log(`executing: ${execStr}`);
 

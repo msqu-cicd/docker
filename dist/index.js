@@ -61357,6 +61357,13 @@ function result_to_output(results) {
   }
 }
 
+function isTrueString(str) {
+  return str === '1'
+    || str === 'true'
+    || str === 'True'
+    || str === 'TRUE';
+}
+
 ;// CONCATENATED MODULE: ../information/src/collect_ci.js
 
 
@@ -61786,12 +61793,10 @@ function collect_all(debug = false, output = false) {
     console.log(JSON.stringify(lib_github.context, null, 2));
   }
 
-  const results = {
+  return {
     ...collect_ci(debug, output),
     ...collect_git(debug, output)
   };
-
-  return results
 }
 
 
@@ -62121,11 +62126,6 @@ function processAdditionalRegistries(targetRegistries) {
   }
 }
 
-function base64ToBytes(base64) {
-  const binString = atob(base64);
-  return Uint8Array.from(binString, (m) => m.codePointAt(0));
-}
-
 function addCiRegistryAuth(ci_registry, registryAuthJson) {
   if (!core.getBooleanInput('add_ci_registry_auth')) {
     return;
@@ -62306,6 +62306,9 @@ function executeDockerBuild(dockerArgs, destinations) {
   if (core.getBooleanInput('docker_push')) {
     dockerSubCmd += ' --push';
   }
+  if (core.getBooleanInput('docker_pull')) {
+    dockerSubCmd += ' --pull';
+  }
   const execStr = `docker ${dockerSubCmd} ${dockerArgsStr}`;
   console.log(`executing: ${execStr}`);
 
@@ -62338,6 +62341,13 @@ function executeDockerBuild(dockerArgs, destinations) {
   }
 }
 
+function lib_isTrueString(str) {
+  return str === '1'
+    || str === 'true'
+    || str === 'True'
+    || str === 'TRUE';
+}
+
 ;// CONCATENATED MODULE: ./src/action.js
 
 
@@ -62347,9 +62357,8 @@ function executeDockerBuild(dockerArgs, destinations) {
 
 try {
   const information = collect_all(true, false);
-  let debug         = core.getInput('debug') != null ? (!!core.getInput('debug')) : true;
-  console.log('debug=', debug);
-  debug = true;
+
+  const debug = lib_isTrueString(process.env['ACTIONS_STEP_DEBUG']);
 
   let targetRegistries = [];
   const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;

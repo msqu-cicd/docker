@@ -73,7 +73,11 @@ inputs:
     default: "true"
 
   docker_push:
-    description: ""
+    description: "Push all build tags to destinations"
+    default: "true"
+
+  docker_pull:
+    description: "Always attempt to pull all referenced images"
     default: "true"
 
   use_buildx:
