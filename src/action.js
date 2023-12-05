@@ -5,6 +5,7 @@ import {
   addCiRegistryAuth,
   collectTags,
   executeDockerBuild,
+  isTrueString,
   mergeArgRegistryAuthJson,
   prepareDestinations,
   prepareDockerArgs,
@@ -16,8 +17,7 @@ import {
 try {
   const information = action_information.collect_all(true, false);
 
-  const debug = process.env['ACTIONS_STEP_DEBUG'] === '1' || process.env['ACTIONS_STEP_DEBUG'] === 'true';
-  console.log('debug=', debug);
+  const debug = isTrueString(process.env['ACTIONS_STEP_DEBUG']);
 
   let targetRegistries = [];
   const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;

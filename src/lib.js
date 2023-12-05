@@ -230,3 +230,10 @@ export function executeDockerBuild(dockerArgs, destinations) {
     throw proc.error;
   }
 }
+
+export function isTrueString(str) {
+  return str === '1'
+    || str === 'true'
+    || str === 'True'
+    || str === 'TRUE';
+}
