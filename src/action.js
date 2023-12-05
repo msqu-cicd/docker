@@ -15,9 +15,9 @@ import {
 
 try {
   const information = action_information.collect_all(true, false);
-  let debug         = core.getInput('debug') != null ? (!!core.getInput('debug')) : true;
+
+  const debug = process.env['ACTIONS_STEP_DEBUG'] === '1' || process.env['ACTIONS_STEP_DEBUG'] === 'true';
   console.log('debug=', debug);
-  debug = true;
 
   let targetRegistries = [];
   const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
