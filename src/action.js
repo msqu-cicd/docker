@@ -28,7 +28,7 @@ try {
     targetRegistries.push(ci_registry);
   }
 
-  processAdditionalRegistries();
+  processAdditionalRegistries(targetRegistries);
   const registryAuthJson = {auths: {}};
   addCiRegistryAuth(ci_registry, registryAuthJson);
   mergeArgRegistryAuthJson(registryAuthJson);
