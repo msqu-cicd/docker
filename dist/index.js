@@ -62118,7 +62118,7 @@ function processAdditionalRegistries(targetRegistries) {
     const additionalRegistriesArr = additionalRegistries.split(',');
     for (let registry of additionalRegistriesArr) {
       registry = registry.trim();
-      if (!registry.contains(':')) {
+      if (!registry.includes(':')) {
         registry += ':';
       }
       targetRegistries.push(registry);
