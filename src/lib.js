@@ -61,6 +61,29 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
 
 export function writeRegistryAuthJson(registryAuthJson, targetFile) {
   fs.mkdirSync(path.dirname(targetFile), {recursive: true});
+  const jsonContents = JSON.stringify(registryAuthJson, null, 2);
+
+  // create and log a censored copy if enabled
+  if (core.getBooleanInput('debug_log_auth_json')) {
+    const copy = JSON.parse(jsonContents);
+    for (const registry in copy.auths) {
+      if (copy.auths.hasOwnProperty(registry)) {
+        let credentials = copy.auths[registry].auth;
+        if (credentials != null) {
+          // truncate credentials to avoid leaking sensitive information
+          if (credentials.length > 16) {
+            credentials = credentials.substr(0, 16) + '...';
+          }
+          else {
+            credentials = '***censored***';
+          }
+          copy.auths[registry].auth = credentials;
+        }
+      }
+    }
+    console.log('debug_log_auth_json:', copy);
+  }
+
   fs.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 

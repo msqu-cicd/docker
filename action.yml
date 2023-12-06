@@ -105,6 +105,18 @@ inputs:
     default: ""
     required: false
 
+  debug_log_github_context:
+    description: "Log github.context as JSON for debugging purposes"
+    default: "false"
+
+  debug_log_auth_json:
+    description: "WARNING: may leak credentials to logs. Log docker auth.json contents for debugging purposes"
+    default: "false"
+
+  debug_log_destinations:
+    description: "Log docker build destinations for debugging purposes"
+    default: "true"
+
 outputs:
   published_tags:
     description: "Published tags as csv"

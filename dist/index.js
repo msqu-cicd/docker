@@ -61788,11 +61788,6 @@ function collect_git(debug = false, output = false) {
 
 
 function collect_all(debug = false, output = false) {
-
-  if (debug) {
-    console.log(JSON.stringify(lib_github.context, null, 2));
-  }
-
   return {
     ...collect_ci(debug, output),
     ...collect_git(debug, output)
@@ -62168,6 +62163,29 @@ function mergeArgRegistryAuthJson(registryAuthJson) {
 
 function writeRegistryAuthJson(registryAuthJson, targetFile) {
   external_fs_.mkdirSync(external_path_.dirname(targetFile), {recursive: true});
+  const jsonContents = JSON.stringify(registryAuthJson, null, 2);
+
+  // create and log a censored copy if enabled
+  if (core.getBooleanInput('debug_log_auth_json')) {
+    const copy = JSON.parse(jsonContents);
+    for (const registry in copy.auths) {
+      if (copy.auths.hasOwnProperty(registry)) {
+        let credentials = copy.auths[registry].auth;
+        if (credentials != null) {
+          // truncate credentials to avoid leaking sensitive information
+          if (credentials.length > 16) {
+            credentials = credentials.substr(0, 16) + '...';
+          }
+          else {
+            credentials = '***censored***';
+          }
+          copy.auths[registry].auth = credentials;
+        }
+      }
+    }
+    console.log('debug_log_auth_json:', copy);
+  }
+
   external_fs_.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
 }
 
@@ -62356,6 +62374,10 @@ function lib_isTrueString(str) {
 
 
 try {
+  if (lib_isTrueString(core.getBooleanInput('debug_log_github_context'))) {
+    console.log(JSON.stringify(github.context, null, 2));
+  }
+
   const information = collect_all(true, false);
 
   const debug = lib_isTrueString(process.env['ACTIONS_STEP_DEBUG']);
@@ -62381,7 +62403,7 @@ try {
   }
 
   const destinations = prepareDestinations(targetRegistries, tags);
-  if (debug) {
+  if (debug || core.getBooleanInput('debug_log_destinations')) {
     console.log('destinations:', JSON.stringify(destinations, null, 2));
   }
 

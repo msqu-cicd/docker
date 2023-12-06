@@ -15,6 +15,10 @@ import {
 
 
 try {
+  if (isTrueString(core.getBooleanInput('debug_log_github_context'))) {
+    console.log(JSON.stringify(github.context, null, 2));
+  }
+
   const information = action_information.collect_all(true, false);
 
   const debug = isTrueString(process.env['ACTIONS_STEP_DEBUG']);
@@ -40,7 +44,7 @@ try {
   }
 
   const destinations = prepareDestinations(targetRegistries, tags);
-  if (debug) {
+  if (debug || core.getBooleanInput('debug_log_destinations')) {
     console.log('destinations:', JSON.stringify(destinations, null, 2));
   }
 
