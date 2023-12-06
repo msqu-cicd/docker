@@ -201,8 +201,13 @@ export function prepareDockerArgs(destinations) {
     dockerArgs.push('--tag ' + dest);
   });
 
-  if (isNonEmptyStr(core.getInput('additional_registry_destinations'))) {
-    dockerArgs.push(core.getInput('additional_registry_destinations'));
+  if (isNonEmptyStr(core.getInput('additional_destinations'))) {
+    core.getInput('additional_destinations')
+        .split(',')
+        .map(s => s.trim())
+        .forEach(dst => {
+          dockerArgs.push('--tag ' + dst);
+        });
   }
 
   if (isNonEmptyStr(core.getInput('build_args'))) {

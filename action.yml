@@ -33,7 +33,7 @@ inputs:
     default: "true"
 
   tags_additional:
-    description: "list of additional tags to add, as CSV"
+    description: "list of additional tags to add as CSV for each registry configured"
 
   tag_semver_enable:
     description: "set to false to disable semver tagging completely"
@@ -51,13 +51,9 @@ inputs:
     description: ""
     default: "true"
 
-  additional_registry_destinations:
-    description: "a list of --destination registry/orga/repo:tag strings, space separated"
+  additional_destinations:
+    description: "a list of registry/owner/repo:tag strings, csv separated. These tags are created and pushed as is without modifications like prefix."
     default: ""
-
-  squash_layers:
-    description: ""
-    default: "true"
 
   additional_registries:
     description: ""
@@ -76,6 +72,10 @@ inputs:
     default: ""
 
   merge_registry_json:
+    description: ""
+    default: "true"
+
+  squash_layers:
     description: ""
     default: "true"
 
