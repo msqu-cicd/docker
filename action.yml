@@ -28,12 +28,8 @@ inputs:
     description: "a suffix to add to docker tags that were generated from commit sha"
     default: "commit-"
 
-  tag_ref_slug_enable:
-    description: "generate a tag from the git ref slug"
-    default: "false"
-
   tag_ref_normalized_enable:
-    description: ""
+    description: "generate a tag from the git reference (eg. tag or branch name, skipped if semver was successfully parsed)"
     default: "true"
 
   tags_additional:
