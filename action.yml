@@ -36,6 +36,9 @@ inputs:
     description: ""
     default: "true"
 
+  tags_additional:
+    description: "list of additional tags to add, as CSV"
+
   tag_semver_enable:
     description: "set to false to disable semver tagging completely"
     default: "true"

@@ -62232,6 +62232,15 @@ function collectTags(information) {
     }
   }
 
+  // handle additional tags
+  core.getInput('tags_additional')
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => s.length > 0)
+      .forEach(t => {
+        tags.push(t);
+      });
+
   // handle commit sha
   if (core.getBooleanInput('tag_commit_enable') && isNonEmptyStr(github.context.sha)) {
     tags.push(tagPrefix + tagCommitPrefix + github.context.sha + tagSuffix);
