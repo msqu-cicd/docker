@@ -88,7 +88,7 @@ inputs:
     description: "use buildx instead of legacy build"
     default: "true"
 
-  docker_multi_arch:
+  docker_multiarch:
     description: ""
     default: "false"
 
