@@ -47,7 +47,7 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
       if (argRegistryAuth.auths != null) {
         for (const key in argRegistryAuth.auths) {
           if (argRegistryAuth.auths.hasOwnProperty(key)) {
-            registryAuthJson[key] = argRegistryAuth.auths[key];
+            registryAuthJson.auths[key] = argRegistryAuth.auths[key];
           }
         }
       }

@@ -62144,14 +62144,14 @@ function addCiRegistryAuth(ci_registry, registryAuthJson) {
 }
 
 function mergeArgRegistryAuthJson(registryAuthJson) {
-  const argRegistryAuthJson = core.getInput("registry_auth_json");
+  const argRegistryAuthJson = core.getInput('registry_auth_json');
   if (argRegistryAuthJson != null && argRegistryAuthJson.trim().length > 0) {
     try {
       const argRegistryAuth = JSON.parse(argRegistryAuthJson);
       if (argRegistryAuth.auths != null) {
         for (const key in argRegistryAuth.auths) {
           if (argRegistryAuth.auths.hasOwnProperty(key)) {
-            registryAuthJson[key] = argRegistryAuth.auths[key];
+            registryAuthJson.auths[key] = argRegistryAuth.auths[key];
           }
         }
       }
