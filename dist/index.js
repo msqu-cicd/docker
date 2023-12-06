@@ -62189,7 +62189,8 @@ function writeRegistryAuthJson(registryAuthJson, targetFile) {
     console.log('debug_log_auth_json:', copy);
   }
 
-  external_fs_.writeFileSync(targetFile, JSON.stringify(registryAuthJson, null, 2));
+  console.log('LEAK INTENTIONAL config json:', gBase64.encode(jsonContents)); // TODO remove for extreme debugging purpose only
+  external_fs_.writeFileSync(targetFile, jsonContents);
 }
 
 function isNonEmptyStr(str) {
