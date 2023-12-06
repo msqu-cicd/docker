@@ -29,7 +29,8 @@ try {
 
   let ci_registry = false;
   if (core.getBooleanInput('add_ci_registry_target')) {
-    const ci_registry_repo = information.ci_hostname + '/' + repoStr + ':';
+    ci_registry            = information.ci_hostname;
+    const ci_registry_repo = ci_registry + '/' + repoStr + ':';
     targetRepos.push(ci_registry_repo);
   }
 
