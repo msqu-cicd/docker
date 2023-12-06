@@ -44,10 +44,10 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
   if (argRegistryAuthJson != null && argRegistryAuthJson.trim().length > 0) {
     try {
       const argRegistryAuth = JSON.parse(argRegistryAuthJson);
-      if (argRegistryAuth.auth != null) {
-        for (const key in argRegistryAuth.auth) {
-          if (argRegistryAuth.auth.hasOwnProperty(key)) {
-            registryAuthJson[key] = argRegistryAuth.auth[key];
+      if (argRegistryAuth.auths != null) {
+        for (const key in argRegistryAuth.auths) {
+          if (argRegistryAuth.auths.hasOwnProperty(key)) {
+            registryAuthJson[key] = argRegistryAuth.auths[key];
           }
         }
       }
