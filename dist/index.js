@@ -62144,7 +62144,7 @@ function addCiRegistryAuth(ci_registry, registryAuthJson) {
 }
 
 function mergeArgRegistryAuthJson(registryAuthJson) {
-  const argRegistryAuthJson = process.env['REGISTRY_AUTH_JSON'];
+  const argRegistryAuthJson = core.getInput("registry_auth_json");
   if (argRegistryAuthJson != null && argRegistryAuthJson.trim().length > 0) {
     try {
       const argRegistryAuth = JSON.parse(argRegistryAuthJson);
