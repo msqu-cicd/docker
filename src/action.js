@@ -4,6 +4,7 @@ import * as action_information from 'information';
 import {
   addCiRegistryAuth,
   collectTags,
+  determineDockerConfigFileLocation,
   executeDockerBuild,
   isTrueString,
   mergeArgRegistryAuthJson,
@@ -23,27 +24,33 @@ try {
 
   const debug = isTrueString(process.env['ACTIONS_STEP_DEBUG']);
 
-  let targetRegistries = [];
-  const repoStr        = github.context.repo.owner + '/' + github.context.repo.repo;
+  let targetRepos = [];
+  const repoStr   = github.context.repo.owner + '/' + github.context.repo.repo;
 
   let ci_registry = false;
   if (core.getBooleanInput('add_ci_registry_target')) {
-    ci_registry = information.ci_hostname + '/' + repoStr + ':';
-    targetRegistries.push(ci_registry);
+    const ci_registry_repo = information.ci_hostname + '/' + repoStr + ':';
+    targetRepos.push(ci_registry_repo);
   }
 
-  processAdditionalRegistries(targetRegistries);
+  processAdditionalRegistries(targetRepos);
+
+  const dockerConfigFile = determineDockerConfigFileLocation(core.getInput('docker_auth_json_file'));
+  if (debug) {
+    console.log('determined .docker/config.json location: ', dockerConfigFile);
+  }
+
   const registryAuthJson = {auths: {}};
   addCiRegistryAuth(ci_registry, registryAuthJson);
   mergeArgRegistryAuthJson(registryAuthJson);
-  writeRegistryAuthJson(registryAuthJson, '/home/runner/.docker/config.json');
+  writeRegistryAuthJson(registryAuthJson, dockerConfigFile);
 
   const tags = collectTags(information);
   if (debug) {
     console.log('tags:', JSON.stringify(tags, null, 2));
   }
 
-  const destinations = prepareDestinations(targetRegistries, tags);
+  const destinations = prepareDestinations(targetRepos, tags);
   if (debug || core.getBooleanInput('debug_log_destinations')) {
     console.log('destinations:', JSON.stringify(destinations, null, 2));
   }

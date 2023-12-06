@@ -3,6 +3,7 @@ import * as github from '@actions/github';
 import * as child_process from 'child_process';
 import * as fs from 'fs';
 import {Base64} from 'js-base64';
+import * as os from 'os';
 import * as path from 'path';
 
 export function processAdditionalRegistries(targetRegistries) {
@@ -255,6 +256,20 @@ export function executeDockerBuild(dockerArgs, destinations) {
   if (proc.error != null) {
     throw proc.error;
   }
+}
+
+export function determineDockerConfigFileLocation(path) {
+  if (path == null || !path.length) {
+    return os.homedir + '/.docker/config.json';
+  }
+
+  // absolute path
+  if (path.startsWith('/')) {
+    return path;
+  }
+
+  // relative path to home dir
+  return os.homedir + '/' + path;
 }
 
 export function isTrueString(str) {

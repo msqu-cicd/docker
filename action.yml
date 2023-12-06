@@ -6,6 +6,10 @@ inputs:
     description: docker client image to use for building images
     default: "docker:latest"
 
+  docker_auth_json_file:
+    description: location of the docker auth json file, relative to home dir or absolute path
+    default: ".docker/config.json"
+
   docker_args:
     description: "Extra arguments to pass to docker invocation"
     default: ""
