@@ -62148,10 +62148,10 @@ function mergeArgRegistryAuthJson(registryAuthJson) {
   if (argRegistryAuthJson != null && argRegistryAuthJson.trim().length > 0) {
     try {
       const argRegistryAuth = JSON.parse(argRegistryAuthJson);
-      if (argRegistryAuth.auth != null) {
-        for (const key in argRegistryAuth.auth) {
-          if (argRegistryAuth.auth.hasOwnProperty(key)) {
-            registryAuthJson[key] = argRegistryAuth.auth[key];
+      if (argRegistryAuth.auths != null) {
+        for (const key in argRegistryAuth.auths) {
+          if (argRegistryAuth.auths.hasOwnProperty(key)) {
+            registryAuthJson[key] = argRegistryAuth.auths[key];
           }
         }
       }
@@ -62404,7 +62404,7 @@ try {
 
   let ci_registry = false;
   if (core.getBooleanInput('add_ci_registry_target')) {
-    ci_registry = information.ci_hostname
+    ci_registry            = information.ci_hostname;
     const ci_registry_repo = ci_registry + '/' + repoStr + ':';
     targetRepos.push(ci_registry_repo);
   }
