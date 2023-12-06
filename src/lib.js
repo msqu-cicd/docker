@@ -101,17 +101,19 @@ export function collectTags(information) {
   let tagCommitPrefix = (core.getInput('tag_commit_prefix') ?? '').trim();
 
   // handle semver
-  if (core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)) {
-    tags.push(tagPrefix + information.semver_major);
-    foundSemverTag = true;
-  }
-  if (core.getBooleanInput('tag_semver_minor') && isNonEmptyStr(information.semver_minor)) {
-    tags.push(tagPrefix + information.semver_minor);
-    foundSemverTag = true;
-  }
-  if (core.getBooleanInput('tag_semver_patch') && isNonEmptyStr(information.semver_patch)) {
-    tags.push(tagPrefix + information.semver_patch);
-    foundSemverTag = true;
+  if (core.getBooleanInput('tag_semver_enable')) {
+    if (core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)) {
+      tags.push(tagPrefix + information.semver_major);
+      foundSemverTag = true;
+    }
+    if (core.getBooleanInput('tag_semver_minor') && isNonEmptyStr(information.semver_minor)) {
+      tags.push(tagPrefix + information.semver_minor);
+      foundSemverTag = true;
+    }
+    if (core.getBooleanInput('tag_semver_patch') && isNonEmptyStr(information.semver_patch)) {
+      tags.push(tagPrefix + information.semver_patch);
+      foundSemverTag = true;
+    }
   }
 
   // handle git tag/branch
