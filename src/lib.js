@@ -101,6 +101,16 @@ export function collectTags(information) {
   let tagCommitPrefix = (core.getInput('tag_commit_prefix') ?? '').trim();
 
   // handle semver
+  console.log({
+                'tag_semver_enable'       : core.getBooleanInput('tag_semver_enable'),
+                'tag_semver_major'        : core.getBooleanInput('tag_semver_major'),
+                'tag_semver_minor'        : core.getBooleanInput('tag_semver_minor'),
+                'tag_semver_patch'        : core.getBooleanInput('tag_semver_patch'),
+                'information.semver_major': information.semver_major,
+                'information.semver_minor': information.semver_minor,
+                'information.semver_patch': information.semver_patch,
+                'information'             : information
+              });
   if (core.getBooleanInput('tag_semver_enable')) {
     if (core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)) {
       tags.push(tagPrefix + information.semver_major);
