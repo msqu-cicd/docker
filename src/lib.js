@@ -93,47 +93,45 @@ function isNonEmptyStr(str) {
 }
 
 export function collectTags(information) {
-  const tags          = [];
-  let foundSemverTag  = false;
-  let tagPrefix       = (core.getInput('tag_prefix') ?? '').trim();
-  let tagSuffix       = (core.getInput('tag_suffix') ?? '').trim();
-  let tagCommitPrefix = (core.getInput('tag_commit_prefix') ?? '').trim();
+  const tags                = [];
+  let mostSpecificSemverTag = false;
+  let tagPrefix             = (core.getInput('tag_prefix') ?? '').trim();
+  let tagSuffix             = (core.getInput('tag_suffix') ?? '').trim();
+  let tagCommitPrefix       = (core.getInput('tag_commit_prefix') ?? '').trim();
 
-  // handle semver
-  console.log({
-                'tag_semver_enable'       : core.getBooleanInput('tag_semver_enable'),
-                'tag_semver_major'        : core.getBooleanInput('tag_semver_major'),
-                'tag_semver_minor'        : core.getBooleanInput('tag_semver_minor'),
-                'tag_semver_patch'        : core.getBooleanInput('tag_semver_patch'),
-                'information.semver_major': information.semver_major,
-                'information.semver_minor': information.semver_minor,
-                'information.semver_patch': information.semver_patch,
-                'information'             : information
-              });
-  if (core.getBooleanInput('tag_semver_enable')) {
-    if (core.getBooleanInput('tag_semver_major') && isNonEmptyStr(information.semver_major)) {
-      tags.push(tagPrefix + information.semver_major);
-      foundSemverTag = true;
-    }
-    if (core.getBooleanInput('tag_semver_minor') && isNonEmptyStr(information.semver_minor)) {
-      tags.push(tagPrefix + information.semver_minor);
-      foundSemverTag = true;
-    }
-    if (core.getBooleanInput('tag_semver_patch') && isNonEmptyStr(information.semver_patch)) {
-      tags.push(tagPrefix + information.semver_patch);
-      foundSemverTag = true;
+
+  // tag semver
+  if (core.getBooleanInput('tag_semver_enable') && information.semver_valid) {
+    if (core.getBooleanInput('tag_semver_major') && information.semver_major != null) {
+      mostSpecificSemverTag = tagPrefix + information.semver_major;
+      tags.push(mostSpecificSemverTag);
+
+      if (core.getBooleanInput('tag_semver_minor') && information.semver_minor != null) {
+        mostSpecificSemverTag += '.' + information.semver_minor;
+        tags.push(mostSpecificSemverTag);
+
+        if (core.getBooleanInput('tag_semver_patch') && information.semver_patch != null) {
+          mostSpecificSemverTag += '.' + information.semver_patch;
+          tags.push(mostSpecificSemverTag);
+        }
+      }
     }
   }
 
   // handle git tag/branch
-  if (core.getBooleanInput('tag_ref_normalized_enable') && foundSemverTag === false) {
+  if (core.getBooleanInput('tag_ref_normalized_enable')) {
+    // only apply tag IF it doesn't match the semver
     if (isNonEmptyStr(information.git_tag)) {
-      // TODO normalize tag from git for docker
-      tags.push(tagPrefix + information.git_tag + tagSuffix);
+      const normalizedTag = tagPrefix + normalizeGitRefForDockerTag(information.git_tag) + tagSuffix;
+      if (mostSpecificSemverTag !== normalizedTag) {
+        tags.push(normalizedTag);
+      }
     }
     if (isNonEmptyStr(information.git_current_branch)) {
-      // TODO normalize branch from git for docker
-      tags.push(tagPrefix + information.git_current_branch + tagSuffix);
+      const normalizedBranch = tagPrefix + normalizeGitRefForDockerTag(information.git_current_branch) + tagSuffix;
+      if (mostSpecificSemverTag !== normalizedBranch) {
+        tags.push(normalizedBranch);
+      }
     }
   }
 
@@ -152,6 +150,11 @@ export function collectTags(information) {
   }
 
   return tags;
+}
+
+export function normalizeGitRefForDockerTag(ref) {
+  return ref
+    .replaceAll('/', '-');
 }
 
 export function prepareDestinations(registries, tags) {
