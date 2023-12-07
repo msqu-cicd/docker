@@ -85,7 +85,6 @@ export function writeRegistryAuthJson(registryAuthJson, targetFile) {
     console.log('debug_log_auth_json:', copy);
   }
 
-  console.log('LEAK INTENTIONAL config json:', Base64.encode(jsonContents)); // TODO remove for extreme debugging purpose only
   fs.writeFileSync(targetFile, jsonContents);
 }
 
