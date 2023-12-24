@@ -2,10 +2,6 @@ name: 'Docker'
 description: 'Build and publish docker images'
 
 inputs:
-  docker_image:
-    description: docker client image to use for building images
-    default: "docker:latest"
-
   docker_auth_json_file:
     description: location of the docker auth json file, relative to home dir or absolute path
     default: ".docker/config.json"
