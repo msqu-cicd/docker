@@ -169,12 +169,14 @@ export function prepareDestinations(registries, tags) {
 }
 
 export function getDockerContextDir() {
-  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
-    return core.getInput('docker_context_dir');
-  }
-  else {
+  let contextDir = core.getInput('docker_context_dir');
+  if (!isNonEmptyStr(core.getInput('docker_context_dir'))) {
     return process.env['GITHUB_WORKSPACE'];
   }
+  if (!contextDir.startsWith('/')) {
+    contextDir = process.env['GITHUB_WORKSPACE'] + '/' + contextDir;
+  }
+  return contextDir;
 }
 
 export function prepareDockerArgs(destinations) {

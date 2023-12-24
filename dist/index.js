@@ -61683,6 +61683,7 @@ function collect_git(debug = false, output = false) {
     git_ref_branch       : false,
     git_is_default_branch: false,
     git_tag              : false,
+    git_ref              : false,
     semver_valid         : false,
     semver_major         : false,
     semver_minor         : false,
@@ -61724,13 +61725,15 @@ function collect_git(debug = false, output = false) {
         );
       }
       r.git_current_branch    = lib_github.context.ref.slice('refs/heads/'.length);
+      r.git_ref               = r.git_current_branch;
       r.git_ref_branch        = r.git_current_branch; // same as current branch for non-PR, non-Tag
-      r.git_is_default_branch = r.git_current_branch == r.git_default_branch;
+      r.git_is_default_branch = r.git_current_branch === r.git_default_branch;
     }
 
     // parse semver for tags
     if (r.git_is_tag) {
       r.git_tag = lib_github.context.ref.slice('refs/tags/'.length);
+      r.git_ref = r.git_tag;
 
       const parsed = parseSemVer(r.git_tag);
       if (debug) {
@@ -62273,12 +62276,14 @@ function prepareDestinations(registries, tags) {
 }
 
 function getDockerContextDir() {
-  if (isNonEmptyStr(core.getInput('docker_context_dir'))) {
-    return core.getInput('docker_context_dir');
-  }
-  else {
+  let contextDir = core.getInput('docker_context_dir');
+  if (!isNonEmptyStr(core.getInput('docker_context_dir'))) {
     return process.env['GITHUB_WORKSPACE'];
   }
+  if (!contextDir.startsWith('/')) {
+    contextDir = process.env['GITHUB_WORKSPACE'] + '/' + contextDir;
+  }
+  return contextDir;
 }
 
 function prepareDockerArgs(destinations) {
