@@ -62486,7 +62486,7 @@ try {
   }
 
   const registryAuthJson = {auths: {}};
-  mergeExistingDockerAuthJson(registryAuthJson);
+  mergeExistingDockerAuthJson(registryAuthJson, dockerConfigFile);
   addCiRegistryAuth(ci_registry, registryAuthJson);
   mergeArgRegistryAuthJson(registryAuthJson);
   writeRegistryAuthJson(registryAuthJson, dockerConfigFile);
