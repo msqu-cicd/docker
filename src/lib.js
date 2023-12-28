@@ -62,10 +62,12 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
 
 export function mergeExistingDockerAuthJson(registryAuthJson, targetFile) {
   if (!core.getBooleanInput('merge_existing_auth_json')) {
+    console.log('merge_existing_auth_json is disabled');
     return;
   }
 
   if (!fs.existsSync(targetFile)) {
+    console.log(`${targetFile} does not exist`);
     return;
   }
 
@@ -73,12 +75,17 @@ export function mergeExistingDockerAuthJson(registryAuthJson, targetFile) {
     const existingJsonStr = fs.readFileSync(targetFile, {encoding: 'utf-8'});
     const existingJson    = JSON.parse(existingJsonStr);
 
-    if (existingJson.auths != null && typeof existingJson === 'object') {
+    if (existingJson.auths != null && typeof existingJson.auths === 'object') {
       for (const key in existingJson.auths) {
+        console.log(`existingJson.auths.${key}`);
         if (existingJson.auths.hasOwnProperty(key)) {
+          console.log(`existingJson.auths.${key} has own property, assigning value`);
           registryAuthJson.auths[key] = existingJson.auths[key];
         }
       }
+    }
+    else {
+      console.log('existingJson.auths is ' + typeof existingJson.auths);
     }
   }
   catch (e) {
