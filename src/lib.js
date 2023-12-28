@@ -60,6 +60,34 @@ export function mergeArgRegistryAuthJson(registryAuthJson) {
   }
 }
 
+export function mergeExistingDockerAuthJson(registryAuthJson, targetFile) {
+  if (!core.getBooleanInput('merge_existing_auth_json')) {
+    return;
+  }
+
+  if (!fs.existsSync(targetFile)) {
+    return;
+  }
+
+  try {
+    const existingJsonStr = fs.readFileSync(targetFile, {encoding: 'utf-8'});
+    const existingJson    = JSON.parse(existingJsonStr);
+
+    if (existingJson.auths != null && typeof existingJson === 'object') {
+      for (const key in existingJson.auths) {
+        if (existingJson.auths.hasOwnProperty(key)) {
+          registryAuthJson.auths[key] = existingJson.auths[key];
+        }
+      }
+    }
+  }
+  catch (e) {
+    console.log(`Failed to parse existing docker auth json in file: ${targetFile}"`);
+    core.setFailed(`Failed to parse existing docker auth json in file: ${targetFile}"` + e.message);
+    process.exit(1);
+  }
+}
+
 export function writeRegistryAuthJson(registryAuthJson, targetFile) {
   fs.mkdirSync(path.dirname(targetFile), {recursive: true});
   const jsonContents = JSON.stringify(registryAuthJson, null, 2);

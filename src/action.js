@@ -8,6 +8,7 @@ import {
   executeDockerBuild,
   isTrueString,
   mergeArgRegistryAuthJson,
+  mergeExistingDockerAuthJson,
   prepareDestinations,
   prepareDockerArgs,
   processAdditionalRegistries,
@@ -42,6 +43,7 @@ try {
   }
 
   const registryAuthJson = {auths: {}};
+  mergeExistingDockerAuthJson(registryAuthJson);
   addCiRegistryAuth(ci_registry, registryAuthJson);
   mergeArgRegistryAuthJson(registryAuthJson);
   writeRegistryAuthJson(registryAuthJson, dockerConfigFile);

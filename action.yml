@@ -67,8 +67,8 @@ inputs:
     description: ""
     default: ""
 
-  merge_registry_json:
-    description: ""
+  merge_existing_auth_json:
+    description: "if existing registry auth json in .docker/config.json should be merge into the final auth json"
     default: "true"
 
   squash_layers:

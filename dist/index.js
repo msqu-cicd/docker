@@ -62167,6 +62167,34 @@ function mergeArgRegistryAuthJson(registryAuthJson) {
   }
 }
 
+function mergeExistingDockerAuthJson(registryAuthJson, targetFile) {
+  if (!core.getBooleanInput('merge_existing_auth_json')) {
+    return;
+  }
+
+  if (!external_fs_.existsSync(targetFile)) {
+    return;
+  }
+
+  try {
+    const existingJsonStr = external_fs_.readFileSync(targetFile, {encoding: 'utf-8'});
+    const existingJson    = JSON.parse(existingJsonStr);
+
+    if (existingJson.auths != null && typeof existingJson === 'object') {
+      for (const key in existingJson.auths) {
+        if (existingJson.auths.hasOwnProperty(key)) {
+          registryAuthJson.auths[key] = existingJson.auths[key];
+        }
+      }
+    }
+  }
+  catch (e) {
+    console.log(`Failed to parse existing docker auth json in file: ${targetFile}"`);
+    core.setFailed(`Failed to parse existing docker auth json in file: ${targetFile}"` + e.message);
+    process.exit(1);
+  }
+}
+
 function writeRegistryAuthJson(registryAuthJson, targetFile) {
   external_fs_.mkdirSync(external_path_.dirname(targetFile), {recursive: true});
   const jsonContents = JSON.stringify(registryAuthJson, null, 2);
@@ -62450,7 +62478,9 @@ try {
     console.log('determined .docker/config.json location: ', dockerConfigFile);
   }
 
+
   const registryAuthJson = {auths: {}};
+  mergeExistingDockerAuthJson(registryAuthJson);
   addCiRegistryAuth(ci_registry, registryAuthJson);
   mergeArgRegistryAuthJson(registryAuthJson);
   writeRegistryAuthJson(registryAuthJson, dockerConfigFile);
