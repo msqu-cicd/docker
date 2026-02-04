@@ -18,7 +18,7 @@
   "license": "ISC",
   "dependencies": {
     "@actions/core": "^3.0.0",
-    "@actions/github": "^7.0.0",
+    "@actions/github": "^9.0.0",
     "information": "file:../information",
     "js-base64": "^3.7.7"
   },
