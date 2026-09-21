@@ -21,7 +21,7 @@ jobs:
       - uses: https://github.com/actions/checkout@v7
 
       - name: json-yaml-validate
-        uses: https://github.com/GrantBirki/json-yaml-validate@v3.3.2
+        uses: https://github.com/GrantBirki/json-yaml-validate@v5.0.1
         with:
           allow_multiple_documents: "true"
           # Drone configs reuse anchors across documents, which Drone accepts
