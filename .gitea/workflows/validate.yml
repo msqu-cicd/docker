@@ -1,0 +1,29 @@
+---
+# Lightweight check that runs on every PR. Renovate only automerges when the
+# branch has at least one successful status, so repos without other PR
+# workflows need this.
+name: json-yaml-validate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  json-yaml-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: https://github.com/actions/checkout@v7
+
+      - name: json-yaml-validate
+        uses: https://github.com/GrantBirki/json-yaml-validate@v3.3.2
+        with:
+          allow_multiple_documents: "true"
+          # Drone configs reuse anchors across documents, which Drone accepts
+          # but a standard YAML parser does not.
+          yaml_exclude_regex: '(^|/)\.drone\.yml$'
