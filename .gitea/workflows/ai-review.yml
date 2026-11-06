@@ -19,6 +19,7 @@ on:
         default: audit
         type: string
       model:
+      exclude_paths: 'dist/**'
         description: 'opus or sonnet'
         default: opus
         type: string
