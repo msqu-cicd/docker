@@ -205,113 +205,108 @@ export function getDockerContextDir() {
   return contextDir;
 }
 
+export function collectAdditionalDestinations() {
+  return (core.getInput('additional_destinations') ?? '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+}
+
 export function prepareDockerArgs(destinations) {
-  let dockerArgs = (core.getInput('docker_args') ?? '').trim();
-  if (dockerArgs.length > 0) {
-    dockerArgs = [dockerArgs];
-  }
-  else {
-    dockerArgs = [];
-  }
+  // one argv element per entry; nothing here passes through a shell
+  const dockerArgs = [getDockerContextDir()];
 
   if (isNonEmptyStr(core.getInput('dockerfile'))) {
-    dockerArgs.unshift('--file ' + core.getInput('dockerfile'));
+    dockerArgs.push('--file', core.getInput('dockerfile'));
   }
 
-  dockerArgs.unshift(getDockerContextDir());
+  // extra user supplied arguments, split on any whitespace (newlines included);
+  // quoting is not interpreted, one token becomes one argument
+  (core.getInput('docker_args') ?? '')
+    .split(/\s+/)
+    .filter(s => s.length > 0)
+    .forEach(arg => {
+      dockerArgs.push(arg);
+    });
 
-  if (isNonEmptyStr(core.getInput('docker_multiarch'))) {
+  const multiarchInput = (core.getInput('docker_multiarch') ?? '').trim();
+  const multiarchOff   = ['', 'false', 'False', 'FALSE', '0', 'no', 'No', 'NO'].includes(multiarchInput);
+  if (!multiarchOff) {
     if (!core.getBooleanInput('use_buildx')) {
       throw new Error('Unsupported configuration: Cannot build multiarch without enabling buildx');
     }
-    let archList = (core.getInput('docker_multiarch'));
-    if (archList === 'true' || archList === '1') {
+    let archList = multiarchInput;
+    if (isTrueString(archList)) {
       archList = 'linux/amd64,linux/arm64';
     }
-    if (archList.length > 0) {
-      dockerArgs.push('--platform ' + archList);
-    }
+    dockerArgs.push('--platform', archList);
   }
 
-  if (core.getBooleanInput('squash_layers')) {
+  // buildkit/buildx has no --squash support, only pass it to the legacy builder
+  if (core.getBooleanInput('squash_layers') && !core.getBooleanInput('use_buildx')) {
     dockerArgs.push('--squash');
   }
 
   destinations.forEach(dest => {
-    dockerArgs.push('--tag ' + dest);
+    dockerArgs.push('--tag', dest);
   });
 
-  if (isNonEmptyStr(core.getInput('additional_destinations'))) {
-    core.getInput('additional_destinations')
-        .split(',')
-        .map(s => s.trim())
-        .forEach(dst => {
-          dockerArgs.push('--tag ' + dst);
-        });
-  }
+  collectAdditionalDestinations().forEach(dst => {
+    dockerArgs.push('--tag', dst);
+  });
 
   if (isNonEmptyStr(core.getInput('build_args'))) {
-    let buildArgs = core.getInput('build_args')
-                        .split('\n')
-                        .map(s => s.trim())
-                        .map(s => {
-                          const equalIndex = s.indexOf('=');
-                          const key        = s.substring(0, equalIndex);
-                          const value      = s.substring(equalIndex + 1);
-                          return {
-                            key,
-                            value
-                          };
-                        });
-
-    console.log('parsed build_args as: ', JSON.stringify(buildArgs, null, 2));
-    buildArgs.forEach(arg => {
-      dockerArgs.push(`--build-arg ${arg.key}="${arg.value}"`);
-    });
+    core.getInput('build_args')
+        .split('\n')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .forEach(s => {
+          const equalIndex = s.indexOf('=');
+          if (equalIndex <= 0) {
+            console.log(`WARNING: ignoring build_args line without key=value format: ${s.substring(0, 64)}`);
+            return;
+          }
+          console.log('adding build arg:', s.substring(0, equalIndex));
+          dockerArgs.push('--build-arg', s);
+        });
   }
 
   return dockerArgs;
 }
 
 export function executeDockerBuild(dockerArgs, destinations) {
-  const dockerArgsStr = dockerArgs.join(' ');
-  const isBuildX      = core.getBooleanInput('use_buildx');
-  let dockerSubCmd    = isBuildX ? 'buildx build' : 'build';
+  const isBuildX = core.getBooleanInput('use_buildx');
+  const args     = isBuildX ? ['buildx', 'build'] : ['build'];
   if (core.getBooleanInput('docker_push')) {
-    dockerSubCmd += ' --push';
+    args.push('--push');
   }
   if (core.getBooleanInput('docker_pull')) {
-    dockerSubCmd += ' --pull';
+    args.push('--pull');
   }
-  const execStr = `docker ${dockerSubCmd} ${dockerArgsStr}`;
-  console.log(`executing: ${execStr}`);
+  args.push(...dockerArgs);
 
-  const proc = child_process.spawnSync(execStr, {
-    shell: true,
+  // log the command with build-arg values masked
+  const logArgs = args.map((arg, i) => {
+    return i > 0 && args[i - 1] === '--build-arg' ? arg.replace(/=[\s\S]*/, '=***') : arg;
+  });
+  console.log('executing: docker ' + logArgs.join(' '));
+
+  const proc = child_process.spawnSync('docker', args, {
+    shell: false,
     stdio: 'inherit',
     cwd  : getDockerContextDir()
   });
 
-  // push for legacy builder
-  // if (!isBuildX && core.getBooleanInput('docker_push')) {
-  //   destinations.forEach(dst => {
-  //     const pushProc = child_process.spawnSync('docker push ' + dst, {
-  //       shell: true,
-  //       stdio: 'inherit',
-  //       cwd  : getDockerContextDir()
-  //     });
-  //     if (pushProc.status != null && pushProc.status > 0) {
-  //       throw new Error('docker push ' + dst + ' failed');
-  //     }
-  //   });
-  // }
-
-  if (proc.status != null && proc.status > 0) {
-    throw new Error('docker build failed');
-  }
-
   if (proc.error != null) {
     throw proc.error;
+  }
+
+  if (proc.signal != null) {
+    throw new Error(`docker build was terminated by signal ${proc.signal}`);
+  }
+
+  if (proc.status !== 0) {
+    throw new Error(`docker build failed with exit code ${proc.status}`);
   }
 }
 
