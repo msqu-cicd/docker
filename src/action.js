@@ -3,6 +3,7 @@ import * as github from '@actions/github';
 import * as action_information from 'information';
 import {
   addCiRegistryAuth,
+  collectAdditionalDestinations,
   collectTags,
   determineDockerConfigFileLocation,
   executeDockerBuild,
@@ -17,7 +18,7 @@ import {
 
 
 try {
-  if (isTrueString(core.getBooleanInput('debug_log_github_context'))) {
+  if (core.getBooleanInput('debug_log_github_context')) {
     console.log(JSON.stringify(github.context, null, 2));
   }
 
@@ -26,7 +27,8 @@ try {
   const debug = isTrueString(process.env['ACTIONS_STEP_DEBUG']);
 
   let targetRepos = [];
-  const repoStr   = github.context.repo.owner + '/' + github.context.repo.repo;
+  // docker repository names must be lowercase
+  const repoStr   = (github.context.repo.owner + '/' + github.context.repo.repo).toLowerCase();
 
   let ci_registry = false;
   if (core.getBooleanInput('add_ci_registry_target')) {
@@ -64,6 +66,8 @@ try {
   }
 
   executeDockerBuild(dockerArgs, destinations);
+
+  core.setOutput('published_tags', destinations.concat(collectAdditionalDestinations()).join(','));
 }
 catch (error) {
   console.log('Failed to build docker image', error);
