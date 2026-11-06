@@ -17,11 +17,11 @@ inputs:
     description: "a suffix to add to all docker tags"
 
   tag_commit_enable:
-    description: "generate docker tags for git tag if present"
+    description: "generate a docker tag from the commit sha"
     default: "true"
 
   tag_commit_prefix:
-    description: "a suffix to add to docker tags that were generated from commit sha"
+    description: "a prefix to add to docker tags that were generated from commit sha"
     default: "commit-"
 
   tag_ref_normalized_enable:
@@ -36,15 +36,15 @@ inputs:
     default: "true"
 
   tag_semver_major:
-    description: ""
+    description: "generate a docker tag for the semver major version (eg. 1)"
     default: "true"
 
   tag_semver_minor:
-    description: ""
+    description: "generate a docker tag for the semver major.minor version (eg. 1.2)"
     default: "true"
 
   tag_semver_patch:
-    description: ""
+    description: "generate a docker tag for the semver major.minor.patch version (eg. 1.2.3)"
     default: "true"
 
   additional_destinations:
@@ -52,19 +52,19 @@ inputs:
     default: ""
 
   additional_registries:
-    description: ""
+    description: "list of additional registry/owner/repo targets as CSV, the generated tags are appended to each"
     default: ""
 
   add_ci_registry_auth:
-    description: ""
+    description: "add auth for the ci registry (from ci_registry_password) to the docker auth json"
     default: "true"
 
   add_ci_registry_target:
-    description: ""
+    description: "add the ci registry repository of the current repo as a build/push target"
     default: "true"
 
   registry_auth_json:
-    description: ""
+    description: "additional docker auth json ({\"auths\": {...}}) merged into the generated auth file"
     default: ""
 
   merge_existing_auth_json:
@@ -72,7 +72,7 @@ inputs:
     default: "true"
 
   squash_layers:
-    description: ""
+    description: "squash image layers (legacy builder only, buildx/buildkit does not support --squash)"
     default: "true"
 
   docker_push:
@@ -88,7 +88,7 @@ inputs:
     default: "true"
 
   docker_multiarch:
-    description: ""
+    description: "false to disable, true for linux/amd64,linux/arm64 or an explicit platform list (requires buildx)"
     default: "false"
 
   dockerfile:
@@ -96,7 +96,7 @@ inputs:
     default: "Dockerfile"
 
   docker_context_dir:
-    description: "${{ github.workspace }}"
+    description: "docker build context directory, absolute or relative to the workspace; defaults to the workspace"
 
   ci_registry_password:
     description: "password/token for default ci registry, should usually be set to secret value with ${{ secrets.someSecretName }} for gitea"
