@@ -91,7 +91,7 @@ export function mergeExistingDockerAuthJson(registryAuthJson, targetFile) {
 }
 
 export function writeRegistryAuthJson(registryAuthJson, targetFile) {
-  fs.mkdirSync(path.dirname(targetFile), {recursive: true});
+  fs.mkdirSync(path.dirname(targetFile), {recursive: true, mode: 0o700});
   const jsonContents = JSON.stringify(registryAuthJson, null, 2);
 
   // create and log a censored copy if enabled
@@ -99,23 +99,19 @@ export function writeRegistryAuthJson(registryAuthJson, targetFile) {
     const copy = JSON.parse(jsonContents);
     for (const registry in copy.auths) {
       if (copy.auths.hasOwnProperty(registry)) {
-        let credentials = copy.auths[registry].auth;
-        if (credentials != null) {
-          // truncate credentials to avoid leaking sensitive information
-          if (credentials.length > 16) {
-            credentials = credentials.substr(0, 16) + '...';
+        // censor every credential field completely
+        for (const field in copy.auths[registry]) {
+          if (copy.auths[registry].hasOwnProperty(field)) {
+            copy.auths[registry][field] = '***censored***';
           }
-          else {
-            credentials = '***censored***';
-          }
-          copy.auths[registry].auth = credentials;
         }
       }
     }
     console.log('debug_log_auth_json:', copy);
   }
 
-  fs.writeFileSync(targetFile, jsonContents);
+  fs.writeFileSync(targetFile, jsonContents, {mode: 0o600});
+  fs.chmodSync(targetFile, 0o600);
 }
 
 function isNonEmptyStr(str) {
@@ -321,7 +317,7 @@ export function executeDockerBuild(dockerArgs, destinations) {
 
 export function determineDockerConfigFileLocation(path) {
   if (path == null || !path.length) {
-    return os.homedir + '/.docker/config.json';
+    return os.homedir() + '/.docker/config.json';
   }
 
   // absolute path
@@ -330,7 +326,7 @@ export function determineDockerConfigFileLocation(path) {
   }
 
   // relative path to home dir
-  return os.homedir + '/' + path;
+  return os.homedir() + '/' + path;
 }
 
 export function isTrueString(str) {
