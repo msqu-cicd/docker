@@ -12,7 +12,13 @@ export function processAdditionalRegistries(targetRegistries) {
     const additionalRegistriesArr = additionalRegistries.split(',');
     for (let registry of additionalRegistriesArr) {
       registry = registry.trim();
-      if (!registry.includes(':')) {
+      if (registry.length <= 0) {
+        continue;
+      }
+      // only treat a ':' after the last '/' as a tag separator, so a registry
+      // with a port (registry:5000/owner/repo) still gets one appended
+      const lastSegment = registry.substring(registry.lastIndexOf('/') + 1);
+      if (!lastSegment.includes(':')) {
         registry += ':';
       }
       targetRegistries.push(registry);
@@ -127,29 +133,34 @@ export function collectTags(information) {
 
 
   // tag semver
+  let semverVersion = false;
   if (core.getBooleanInput('tag_semver_enable') && information.semver_valid) {
     if (core.getBooleanInput('tag_semver_major') && information.semver_major != null) {
-      mostSpecificSemverTag = tagPrefix + information.semver_major;
-      tags.push(mostSpecificSemverTag);
+      semverVersion = '' + information.semver_major;
+      tags.push(tagPrefix + semverVersion + tagSuffix);
 
       if (core.getBooleanInput('tag_semver_minor') && information.semver_minor != null) {
-        mostSpecificSemverTag += '.' + information.semver_minor;
-        tags.push(mostSpecificSemverTag);
+        semverVersion += '.' + information.semver_minor;
+        tags.push(tagPrefix + semverVersion + tagSuffix);
 
         if (core.getBooleanInput('tag_semver_patch') && information.semver_patch != null) {
-          mostSpecificSemverTag += '.' + information.semver_patch;
-          tags.push(mostSpecificSemverTag);
+          semverVersion += '.' + information.semver_patch;
+          tags.push(tagPrefix + semverVersion + tagSuffix);
         }
       }
     }
   }
+  if (semverVersion !== false) {
+    mostSpecificSemverTag = tagPrefix + semverVersion + tagSuffix;
+  }
 
   // handle git tag/branch
   if (core.getBooleanInput('tag_ref_normalized_enable')) {
-    // only apply tag IF it doesn't match the semver
+    // only apply tag IF it doesn't match the semver (a git tag "v1.2.3" matches semver "1.2.3")
     if (isNonEmptyStr(information.git_tag)) {
-      const normalizedTag = tagPrefix + normalizeGitRefForDockerTag(information.git_tag) + tagSuffix;
-      if (mostSpecificSemverTag !== normalizedTag) {
+      const normalizedTag    = tagPrefix + normalizeGitRefForDockerTag(information.git_tag) + tagSuffix;
+      const normalizedTagNoV = tagPrefix + normalizeGitRefForDockerTag(information.git_tag.replace(/^v/, '')) + tagSuffix;
+      if (mostSpecificSemverTag !== normalizedTag && mostSpecificSemverTag !== normalizedTagNoV) {
         tags.push(normalizedTag);
       }
     }
@@ -179,8 +190,12 @@ export function collectTags(information) {
 }
 
 export function normalizeGitRefForDockerTag(ref) {
+  // docker tags may only contain [A-Za-z0-9_.-], must not start with '.' or '-'
+  // and are limited to 128 characters
   return ref
-    .replaceAll('/', '-');
+    .replace(/[^A-Za-z0-9_.-]/g, '-')
+    .replace(/^[.-]+/, '')
+    .substring(0, 128);
 }
 
 export function prepareDestinations(registries, tags) {
