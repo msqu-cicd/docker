@@ -19,7 +19,6 @@ on:
         default: audit
         type: string
       model:
-      exclude_paths: 'dist/**'
         description: 'opus or sonnet'
         default: opus
         type: string
@@ -43,6 +42,7 @@ jobs:
     with:
       mode: ${{ inputs.mode || '' }}
       model: ${{ inputs.model || '' }}
+      exclude_paths: 'dist/**'
     secrets:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       # Optional: read access to Infrastructure/infra for the infra usage digest (Ansible roles)
